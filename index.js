@@ -10,7 +10,7 @@ module.exports = {
   Manager,
   Config,
 
-  ...flags,
   ...plugins,
+  ...flags,
   ...ws2,
 }
