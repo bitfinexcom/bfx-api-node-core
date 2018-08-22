@@ -39,6 +39,7 @@
     "standard": "^10.0.2"
   },
   "dependencies": {
+    "bfx-api-node-plugin-seq-audit": "bitfinexcom/bfx-api-node-plugin-seq-audit",
     "bfx-api-node-rest": "bitfinexcom/bfx-api-node-rest",
     "bfx-api-node-models": "bitfinexcom/bfx-api-node-models",
     "bfx-api-node-util": "bitfinexcom/bfx-api-node-util",

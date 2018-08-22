@@ -1,15 +1,37 @@
 'use strict'
 
 const { EventEmitter } = require('events')
+const _isEmpty = require('lodash/isEmpty')
 const _isEqual = require('lodash/isEqual')
+const _isString = require('lodash/isString')
 const _pick = require('lodash/pick')
 const WSv1 = require('bfx-api-node-ws1')
+const Promise = require('bluebird')
 
+const { RESTv1, RESTv2 } = require('bfx-api-node-rest')
+const SeqAuditPlugin = require('bfx-api-node-plugin-seq-audit')
+
+const Config = require('./lib/config')
 const Manager = require('./lib/manager')
+const sendWS = require('./lib/ws2/send')
+const setFlagWS = require('./lib/ws2/flags/set')
+const submitOrderWS = require('./lib/ws2/orders/submit')
+const cancelOrderWS = require('./lib/ws2/orders/cancel')
 const subscribeWS = require('./lib/ws2/subscribe')
 const unsubscribeWS = require('./lib/ws2/unsubscribe')
 const findChannelId = require('./lib/ws2/find_channel_id')
-const { RESTv1, RESTv2 } = require('bfx-api-node-rest')
+
+const authMessageTypes = [
+  'te', 'tu',
+  'os', 'ou', 'on', 'oc',
+  'ps', 'pn', 'pu', 'pc',
+  'fos', 'fon', 'fou', 'foc',
+  'fcs', 'fcn', 'fcu', 'fcc',
+  'fls', 'fln', 'flu', 'flc',
+  'ws', 'wu', 'bu',
+  'miu', 'fiu',
+  'fte', 'ftu'
+]
 
 module.exports = class LegacyWrapper extends EventEmitter {
   /**
@@ -101,7 +123,10 @@ module.exports = class LegacyWrapper extends EventEmitter {
 
     if (version === 2) {
       if (this._manager === null) {
-        this.initManager(extraOpts)
+        this.initManager({
+          ...this._wsArgs,
+          ...extraOpts
+        })
       }
 
       return this
@@ -127,17 +152,51 @@ module.exports = class LegacyWrapper extends EventEmitter {
     this._manager.openWS()
   }
 
+  auth (calc, dms) {
+    if (this._manager === null) {
+      this.initManager()
+    }
+
+    this._manager.auth({
+      apiKey: this._apiKey,
+      apiSecret: this._apiSecret,
+      calc,
+      dms,
+    })
+  }
+
+  close () {
+    if (this._manager !== null) {
+      this._manager.closeAllSockets()
+    }
+  }
+
   initManager (opts = {}) {
     const managerArgs = this._getTransportPayload(opts)
 
+    // NOTE: Rename WS endpoint URL to maintain legacy signature
+    managerArgs.wsURL = managerArgs.url
+    delete managerArgs.url
+
     this._manager = new Manager(managerArgs)
     this._manager.on('ws2:open', () => this.emit('open'))
-    this._manager.on('ws2:candles', (data, meta = {}) => {
-      this.notifyListeners('candles', meta, data)
-    })
+    this._manager.on('ws2:message', (msg) => this.emit('message', msg))
+    this._manager.on('ws2:event:auth:success', () => this.emit('auth'))
 
-    this._manager.on('ws2:trades', (data, meta = {}) => {
-      this.notifyListeners('trades', meta, data)
+    this.mapManagerListenerEvent('ws2:candles', 'candles')
+    this.mapManagerListenerEvent('ws2:trades', 'trades')
+    this.mapManagerListenerEvent('ws2:ticker', 'ticker')
+    this.mapManagerListenerEvent('ws2:bookCS', 'bookCS')
+    this.mapManagerListenerEvent('ws2:book', 'book')
+
+    authMessageTypes.forEach(type => {
+      this.mapManagerListenerEvent(`ws2:auth:${type}`, type)
+    })
+  }
+
+  mapManagerListenerEvent (managerEventName, listenerEventName) {
+    this._manager.on(managerEventName, (data, meta = {}) => {
+      this.notifyListeners(listenerEventName, meta, data)
     })
   }
 
@@ -151,10 +210,12 @@ module.exports = class LegacyWrapper extends EventEmitter {
       ]
 
       listeners.forEach(l => {
-        const fv = _pick(chanFilter, Object.keys(l.filter))
+        if (!_isEmpty(chanFilter)) { // optional
+          const fv = _pick(chanFilter, Object.keys(l.filter))
 
-        if (!_isEqual(l.filter, fv)) {
-          return
+          if (!_isEqual(l.filter, fv)) {
+            return
+          }
         }
 
         l.cb(data)
@@ -187,7 +248,7 @@ module.exports = class LegacyWrapper extends EventEmitter {
 
     listeners[type].push({
       cb,
-      filter,
+      filter
     })
   }
 
@@ -274,6 +335,112 @@ module.exports = class LegacyWrapper extends EventEmitter {
     })
   }
 
+  /////////////////////////
+  // Misc legacy methods //
+  /////////////////////////
+
+  send (msg) {
+    this._manager.withAuthSocket((state = {}) => {
+      sendWS(state, msg)
+    })
+  }
+
+  submitOrder (o) {
+    return new Promise((resolve, reject) => {
+      this._manager.withAuthSocket((state = {}) => {
+        submitOrderWS(state, o).then(resolve).catch(reject)
+      })
+    })
+  }
+
+  cancelOrder (o) {
+    return new Promise((resolve, reject) => {
+      this._manager.withAuthSocket((state = {}) => {
+        cancelOrderWS(state, o).then(resolve).catch(reject)
+      })
+    })
+  }
+
+  enableSequencing ({ audit } = {}) {
+    if (!this._manager) {
+      return
+    }
+
+    if (audit && !this._manager.hasPlugin(SeqAuditPlugin)) {
+      this._manager.addPlugin(SeqAuditPlugin)
+    }
+
+    return new Promise((resolve, reject) => {
+      this._manager.withSocket((state = {}) => {
+        const { ev } = state
+
+        ev.once('event:config', (msg = {}) => {
+          const { status } = msg
+
+          if (status !== 'OK') {
+            reject(msg)
+          } else {
+            resolve(msg)
+          }
+        })
+
+        return setFlagWS(state, Config.FLAGS.SEQ_ALL)
+      })
+    })
+  }
+
+  isFlagEnabled (flag) {
+    if (!this._manager) {
+      return false
+    }
+
+    const ws = this._manager.sampleWS()
+
+    if (!ws) {
+      return false
+    }
+
+    const { flags } = ws
+    return flags & flag
+  }
+
+  /**
+   * Sends a broadcast notification, which will be received by any active UI
+   * websocket connections (at bitfinex.com), triggering a desktop notification.
+   *
+   * In the future our mobile app will also support spawning native push
+   * notifications in response to incoming ucm-notify-ui packets.
+   *
+   * @param {Object} opts
+   * @param {string?} opts.message
+   * @param {string?} opts.type
+   * @param {string?} opts.level
+   * @param {string?} opts.image
+   * @param {string?} opts.link
+   * @param {string?} opts.sound
+   */
+  notifyUI (opts = {}) {
+    const { type, message, level, image, link, sound } = opts
+
+    if (!_isString(type) || !_isString(message)) {
+      throw new Error(`notified with invalid type/message: ${type}/${message}`)
+    }
+
+    this._manager.withAuthSocket((state = {}) => {
+      sendWS(state, [0, 'n', null, {
+        type: 'ucm-notify-ui',
+        info: {
+          type,
+          message,
+          level,
+          image,
+          link,
+          sound
+        }
+      }])
+    })
+  }
+
   /////////////////////////////
   // Legacy listener methods //
   /////////////////////////////
@@ -295,7 +462,10 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-public-candle
    */
   onCandle ({ key, cbGID }, cb) {
-    this.registerListener('candle', { key }, cbGID, cb)
+    const filter = {}
+    if (key) filter.key = key
+
+    this.registerListener('candle', filter, cbGID, cb)
   }
 
   /**
@@ -308,7 +478,13 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-public-order-books
    */
   onOrderBook ({ symbol, prec, len, cbGID }, cb) {
-    this.registerListener('orderbook', { symbol, prec, len }, cbGID, cb)
+    const filter = {}
+
+    if (symbol) filter.symbol = symbol
+    if (prec) filter.prec = prec
+    if (len) filter.len = len
+
+    this.registerListener('book', filter, cbGID, cb)
   }
 
   /**
@@ -321,7 +497,13 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-public-order-books
    */
   onOrderBookChecksum ({ symbol, prec, len, cbGID }, cb) {
-    this.registerListener('ob_checksum', { symbol, prec, len }, cbGID, cb)
+    const filter = {}
+
+    if (symbol) filter.symbol = symbol
+    if (prec) filter.prec = prec
+    if (len) filter.len = len
+
+    this.registerListener('bookCS', filter, cbGID, cb)
   }
 
   /**
@@ -332,7 +514,10 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-public-trades
    */
   onTrades ({ pair, cbGID }, cb) {
-    this.registerListener('trades', { pair }, cbGID, cb)
+    const filter = {}
+    if (pair) filter.pair = pair
+
+    this.registerListener('trades', filter, cbGID, cb)
   }
 
   /**
@@ -343,7 +528,10 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-public-ticker
    */
   onTicker ({ symbol = '', cbGID } = {}, cb) {
-    this.registerListener('ticker', { symbol }, cbGID, cb)
+    const filter = {}
+    if (symbol) filter.symbol = symbol
+
+    this.registerListener('ticker', filter, cbGID, cb)
   }
 
   /**
@@ -357,7 +545,14 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-auth-orders
    */
   onOrderSnapshot ({ symbol, id, cid, gid, cbGID }, cb) {
-    this.registerListener('os', { id, gid, cid, symbol }, cbGID, cb)
+    const filter = {}
+
+    if (symbol) filter.symbol = symbol
+    if (id) filter.id = id
+    if (cid) filter.cid = cid
+    if (gid) filter.gid = gid
+
+    this.registerListener('os', filter, cbGID, cb)
   }
 
   /**
@@ -371,7 +566,14 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-auth-orders
    */
   onOrderNew ({ symbol, id, cid, gid, cbGID }, cb) {
-    this.registerListener('on', { id, gid, cid, symbol }, cbGID, cb)
+    const filter = {}
+
+    if (symbol) filter.symbol = symbol
+    if (id) filter.id = id
+    if (cid) filter.cid = cid
+    if (gid) filter.gid = gid
+
+    this.registerListener('on', filter, cbGID, cb)
   }
 
   /**
@@ -385,7 +587,14 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-auth-orders
    */
   onOrderUpdate ({ symbol, id, cid, gid, cbGID }, cb) {
-    this.registerListener('ou', { id, gid, cid, symbol }, cbGID, cb)
+    const filter = {}
+
+    if (symbol) filter.symbol = symbol
+    if (id) filter.id = id
+    if (cid) filter.cid = cid
+    if (gid) filter.gid = gid
+
+    this.registerListener('ou', filter, cbGID, cb)
   }
 
   /**
@@ -399,7 +608,14 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-auth-orders
    */
   onOrderClose ({ symbol, id, cid, gid, cbGID }, cb) {
-    this.registerListener('oc', { id, gid, cid, symbol }, cbGID, cb)
+    const filter = {}
+
+    if (symbol) filter.symbol = symbol
+    if (id) filter.id = id
+    if (cid) filter.cid = cid
+    if (gid) filter.gid = gid
+
+    this.registerListener('oc', filter, cbGID, cb)
   }
 
   /**
@@ -410,7 +626,10 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-auth-position
    */
   onPositionSnapshot ({ symbol, cbGID }, cb) {
-    this.registerListener('ps', { symbol }, cbGID, cb)
+    const filter = {}
+    if (symbol) filter.symbol = symbol
+
+    this.registerListener('ps', filter, cbGID, cb)
   }
 
   /**
@@ -421,7 +640,10 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-auth-position
    */
   onPositionNew ({ symbol, cbGID }, cb) {
-    this.registerListener('pn', { symbol }, cbGID, cb)
+    const filter = {}
+    if (symbol) filter.symbol = symbol
+
+    this.registerListener('pn', filter, cbGID, cb)
   }
 
   /**
@@ -432,7 +654,10 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-auth-position
    */
   onPositionUpdate ({ symbol, cbGID }, cb) {
-    this.registerListener('pu', { symbol }, cbGID, cb)
+    const filter = {}
+    if (symbol) filter.symbol = symbol
+
+    this.registerListener('pu', filter, cbGID, cb)
   }
 
   /**
@@ -443,7 +668,10 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-auth-position
    */
   onPositionClose ({ symbol, cbGID }, cb) {
-    this.registerListener('pc', { symbol }, cbGID, cb)
+    const filter = {}
+    if (symbol) filter.symbol = symbol
+
+    this.registerListener('pc', filter, cbGID, cb)
   }
 
   /**
@@ -454,7 +682,10 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-auth-trades
    */
   onTradeEntry ({ pair, cbGID }, cb) {
-    this.registerListener('te', { pair }, cbGID, cb)
+    const filter = {}
+    if (pair) filter.pair = pair
+
+    this.registerListener('te', filter, cbGID, cb)
   }
 
   /**
@@ -465,7 +696,10 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-auth-trades
    */
   onTradeUpdate ({ pair, cbGID }, cb) {
-    this.registerListener('tu', { pair }, cbGID, cb)
+    const filter = {}
+    if (pair) filter.pair = pair
+
+    this.registerListener('tu', filter, cbGID, cb)
   }
 
   /**
@@ -476,7 +710,10 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-auth-offers
    */
   onFundingOfferSnapshot ({ symbol, cbGID }, cb) {
-    this.registerListener('fos', { symbol }, cbGID, cb)
+    const filter = {}
+    if (symbol) filter.symbol = symbol
+
+    this.registerListener('fos', filter, cbGID, cb)
   }
 
   /**
@@ -487,7 +724,10 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-auth-offers
    */
   onFundingOfferNew ({ symbol, cbGID }, cb) {
-    this.registerListener('fon', { symbol }, cbGID, cb)
+    const filter = {}
+    if (symbol) filter.symbol = symbol
+
+    this.registerListener('fon', filter, cbGID, cb)
   }
 
   /**
@@ -498,7 +738,10 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-auth-offers
    */
   onFundingOfferUpdate ({ symbol, cbGID }, cb) {
-    this.registerListener('fou', { symbol }, cbGID, cb)
+    const filter = {}
+    if (symbol) filter.symbol = symbol
+
+    this.registerListener('fou', filter, cbGID, cb)
   }
 
   /**
@@ -509,7 +752,10 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-auth-offers
    */
   onFundingOfferClose ({ symbol, cbGID }, cb) {
-    this.registerListener('foc', { symbol }, cbGID, cb)
+    const filter = {}
+    if (symbol) filter.symbol = symbol
+
+    this.registerListener('foc', filter, cbGID, cb)
   }
 
   /**
@@ -520,7 +766,10 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-auth-credits
    */
   onFundingCreditSnapshot ({ symbol, cbGID }, cb) {
-    this.registerListener('fcs', { symbol }, cbGID, cb)
+    const filter = {}
+    if (symbol) filter.symbol = symbol
+
+    this.registerListener('fcs', filter, cbGID, cb)
   }
 
   /**
@@ -531,7 +780,10 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-auth-credits
    */
   onFundingCreditNew ({ symbol, cbGID }, cb) {
-    this.registerListener('fcn', { symbol }, cbGID, cb)
+    const filter = {}
+    if (symbol) filter.symbol = symbol
+
+    this.registerListener('fcn', filter, cbGID, cb)
   }
 
   /**
@@ -542,7 +794,10 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-auth-credits
    */
   onFundingCreditUpdate ({ symbol, cbGID }, cb) {
-    this.registerListener('fcu', { symbol }, cbGID, cb)
+    const filter = {}
+    if (symbol) filter.symbol = symbol
+
+    this.registerListener('fcu', filter, cbGID, cb)
   }
 
   /**
@@ -553,7 +808,10 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-auth-credits
    */
   onFundingCreditClose ({ symbol, cbGID }, cb) {
-    this.registerListener('fcc', { symbol }, cbGID, cb)
+    const filter = {}
+    if (symbol) filter.symbol = symbol
+
+    this.registerListener('fcc', filter, cbGID, cb)
   }
 
   /**
@@ -564,7 +822,10 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-auth-loans
    */
   onFundingLoanSnapshot ({ symbol, cbGID }, cb) {
-    this.registerListener('fls', { symbol }, cbGID, cb)
+    const filter = {}
+    if (symbol) filter.symbol = symbol
+
+    this.registerListener('fls', filter, cbGID, cb)
   }
 
   /**
@@ -575,7 +836,10 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-auth-loans
    */
   onFundingLoanNew ({ symbol, cbGID }, cb) {
-    this.registerListener('fln', { symbol }, cbGID, cb)
+    const filter = {}
+    if (symbol) filter.symbol = symbol
+
+    this.registerListener('fln', filter, cbGID, cb)
   }
 
   /**
@@ -586,7 +850,10 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-auth-loans
    */
   onFundingLoanUpdate ({ symbol, cbGID }, cb) {
-    this.registerListener('flu', { symbol }, cbGID, cb)
+    const filter = {}
+    if (symbol) filter.symbol = symbol
+
+    this.registerListener('flu', filter, cbGID, cb)
   }
 
   /**
@@ -597,7 +864,10 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-auth-loans
    */
   onFundingLoanClose ({ symbol, cbGID }, cb) {
-    this.registerListener('flc', { symbol }, cbGID, cb)
+    const filter = {}
+    if (symbol) filter.symbol = symbol
+
+    this.registerListener('flc', filter, cbGID, cb)
   }
 
   /**
@@ -658,7 +928,10 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-auth-funding-trades
    */
   onFundingTradeEntry ({ symbol, cbGID }, cb) {
-    this.registerListener('fte', { symbol }, cbGID, cb)
+    const filter = {}
+    if (symbol) filter.symbol = symbol
+
+    this.registerListener('fte', filter, cbGID, cb)
   }
 
   /**
@@ -669,7 +942,10 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-auth-funding-trades
    */
   onFundingTradeUpdate ({ symbol, cbGID }, cb) {
-    this.registerListener('ftu', { symbol }, cbGID, cb)
+    const filter = {}
+    if (symbol) filter.symbol = symbol
+
+    this.registerListener('ftu', filter, cbGID, cb)
   }
 
   /**
@@ -680,6 +956,9 @@ module.exports = class LegacyWrapper extends EventEmitter {
    * @see https://docs.bitfinex.com/v2/reference#ws-auth-notifications
    */
   onNotification ({ type, cbGID }, cb) {
-    this.registerListener('n', { type }, cbGID, cb)
+    const filter = {}
+    if (type) filter.type = type
+
+    this.registerListener('n', filter, cbGID, cb)
   }
 }
