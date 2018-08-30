@@ -16,6 +16,7 @@ const Manager = require('./lib/manager')
 const sendWS = require('./lib/ws2/send')
 const setFlagWS = require('./lib/ws2/flags/set')
 const submitOrderWS = require('./lib/ws2/orders/submit')
+const updateOrderWS = require('./lib/ws2/orders/update')
 const cancelOrderWS = require('./lib/ws2/orders/cancel')
 const subscribeWS = require('./lib/ws2/subscribe')
 const unsubscribeWS = require('./lib/ws2/unsubscribe')
@@ -183,6 +184,21 @@ module.exports = class LegacyWrapper extends EventEmitter {
     this._manager.on('ws2:message', (msg) => this.emit('message', msg))
     this._manager.on('ws2:event:auth:success', () => this.emit('auth'))
 
+    this.mapManagerListenerEvent(
+      'ws2:event:info-server-restart',
+      'info-server-restart'
+    )
+
+    this.mapManagerListenerEvent(
+      'ws2:event:info-maintenance-start',
+      'info-maintenance-start'
+    )
+
+    this.mapManagerListenerEvent(
+      'ws2:event:info-maintenance-end',
+      'info-maintenance-end'
+    )
+
     this.mapManagerListenerEvent('ws2:candles', 'candles')
     this.mapManagerListenerEvent('ws2:trades', 'trades')
     this.mapManagerListenerEvent('ws2:ticker', 'ticker')
@@ -345,6 +361,15 @@ module.exports = class LegacyWrapper extends EventEmitter {
     })
   }
 
+  /**
+   * @param {string[]} prefixes
+   */
+  requestCalc (prefixes) {
+    this._manager.withAuthSocket((state = {}) => {
+      return sendWS(state, [0, 'calc', null, prefixes.map(p => [p])])
+    })
+  }
+
   submitOrder (o) {
     return new Promise((resolve, reject) => {
       this._manager.withAuthSocket((state = {}) => {
@@ -357,6 +382,18 @@ module.exports = class LegacyWrapper extends EventEmitter {
     return new Promise((resolve, reject) => {
       this._manager.withAuthSocket((state = {}) => {
         cancelOrderWS(state, o).then(resolve).catch(reject)
+      })
+    })
+  }
+
+  cancelOrders (os) {
+    return Promise.all(os.map(o => this.cancelOrder(o)))
+  }
+
+  updateOrder (changes) {
+    return new Promise((resolve, reject) => {
+      this._manager.withAuthSocket((state = {}) => {
+        updateOrderWS(state, changes).then(resolve).catch(reject)
       })
     })
   }
@@ -452,6 +489,41 @@ module.exports = class LegacyWrapper extends EventEmitter {
    */
   onMessage ({ cbGID }, cb) {
     this.registerListener('', {}, cbGID, cb)
+  }
+
+  /**
+   * Register a callback in case of a ws server restart message; Use this to
+   * call reconnect() if needed. (code 20051)
+   *
+   * @param {Object} opts
+   * @param {string} opts.cbGID
+   * @param {method} cb
+   */
+  onServerRestart ({ cbGID }, cb) {
+    this.registerListener('info-server-restart', {}, cbGID, cb)
+  }
+
+  /**
+   * Register a callback in case of a 'maintenance started' message from the
+   * server. This is a good time to pause server packets until maintenance ends
+   *
+   * @param {Object} opts
+   * @param {string} opts.cbGID
+   * @param {method} cb
+   */
+  onMaintenanceStart ({ cbGID }, cb) {
+    this.registerListener('info-maintenance-start', {}, cbGID, cb)
+  }
+
+  /**
+   * Register a callback to be notified of a maintenance period ending
+   *
+   * @param {Object} opts
+   * @param {string} opts.cbGID
+   * @param {method} cb
+   */
+  onMaintenanceEnd ({ cbGID }, cb) {
+    this.registerListener('info-maintenance-end', {}, cbGID, cb)
   }
 
   /**
