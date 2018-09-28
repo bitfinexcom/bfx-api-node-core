@@ -80,7 +80,7 @@ module.exports = class LegacyWrapper extends EventEmitter {
       apiSecret: this._apiSecret,
       transform: this._transform,
 
-      ...extraOpts,
+      ...extraOpts
     }
   }
 
@@ -162,7 +162,7 @@ module.exports = class LegacyWrapper extends EventEmitter {
       apiKey: this._apiKey,
       apiSecret: this._apiSecret,
       calc,
-      dms,
+      dms
     })
   }
 
@@ -222,7 +222,7 @@ module.exports = class LegacyWrapper extends EventEmitter {
     Object.values(this._ws2Listeners).forEach(group => {
       const listeners = [
         ...(group[type] || []),
-        ...(group[''] || []), // include catch-all
+        ...(group[''] || []) // include catch-all
       ]
 
       listeners.forEach(l => {
@@ -236,18 +236,6 @@ module.exports = class LegacyWrapper extends EventEmitter {
 
         l.cb(data)
       })
-    })
-  }
-
-  subscribeCandles (key) {
-    this._manager.withFreeDataSocket((state = {}) => {
-      return subscribeWS(state, 'candles', { key })
-    })
-  }
-
-  subscribeTrades (symbol) {
-    this._manager.withFreeDataSocket((state = {}) => {
-      return subscribeWS(state, 'trades', { symbol })
     })
   }
 
@@ -268,9 +256,9 @@ module.exports = class LegacyWrapper extends EventEmitter {
     })
   }
 
-  /////////////////////////////////
+  /// //////////////////////////////
   // Legacy subscription methods //
-  /////////////////////////////////
+  /// //////////////////////////////
 
   subscribeCandles (key) {
     this._manager.withFreeDataSocket((state = {}) => {
@@ -351,9 +339,9 @@ module.exports = class LegacyWrapper extends EventEmitter {
     })
   }
 
-  /////////////////////////
+  /// //////////////////////
   // Misc legacy methods //
-  /////////////////////////
+  /// //////////////////////
 
   send (msg) {
     this._manager.withAuthSocket((state = {}) => {
@@ -478,9 +466,9 @@ module.exports = class LegacyWrapper extends EventEmitter {
     })
   }
 
-  /////////////////////////////
+  /// //////////////////////////
   // Legacy listener methods //
-  /////////////////////////////
+  /// //////////////////////////
 
   /**
    * @param {Object} opts

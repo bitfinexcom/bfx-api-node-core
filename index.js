@@ -12,5 +12,5 @@ module.exports = {
 
   ...plugins,
   ...flags,
-  ...ws2,
+  ...ws2
 }
