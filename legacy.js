@@ -53,13 +53,6 @@ module.exports = class LegacyWrapper extends EventEmitter {
   }) {
     super()
 
-    if (opts.constructor.name !== 'Object') {
-      throw new Error([
-        'constructor takes an object since version 2.0.0, see:',
-        'https://github.com/bitfinexcom/bitfinex-api-node#version-200-breaking-changes\n'
-      ].join('\n'))
-    }
-
     this._manager = null
     this._apiKey = opts.apiKey || ''
     this._apiSecret = opts.apiSecret || ''
