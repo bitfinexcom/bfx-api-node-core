@@ -3,7 +3,7 @@
 
 const assert = require('assert')
 const onCandlesMessage = require('ws2/messages/candles')
-const { Candle } = require('bfx-api-node-models')
+const _isObject = require('lodash/isObject')
 
 const defaultState = {
   transform: false,
@@ -67,7 +67,7 @@ describe('ws2:messages:candles', () => {
             const { msg, original, requested, chanFilter } = packet
             assert.deepStrictEqual(msg, candleMessage)
             assert.deepStrictEqual(original, candleMessage[1])
-            assert(requested instanceof Candle)
+            assert(_isObject(requested))
             assert.deepStrictEqual(chanFilter, channel)
             done()
           }
