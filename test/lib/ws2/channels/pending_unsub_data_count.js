@@ -15,6 +15,6 @@ describe('ws2:channels:pending_unsub_data_count', () => {
       }
     })
 
-    assert.equal(count, 1)
+    assert.strictEqual(count, 1)
   })
 })

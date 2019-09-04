@@ -34,8 +34,8 @@ describe('ws2:channels:data_count', () => {
       }
     })
 
-    assert.equal(countA, 1)
-    assert.equal(countB, 2)
-    assert.equal(countC, 2)
+    assert.strictEqual(countA, 1)
+    assert.strictEqual(countB, 2)
+    assert.strictEqual(countC, 2)
   })
 })

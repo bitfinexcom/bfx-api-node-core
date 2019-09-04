@@ -30,8 +30,8 @@ describe('ws2:messages:books', () => {
 
           if (eventName === 'data:book:cs') {
             assert.deepStrictEqual(msg, csMessage)
-            assert.equal(original, csMessage[2])
-            assert.equal(requested, csMessage[2])
+            assert.strictEqual(original, csMessage[2])
+            assert.strictEqual(requested, csMessage[2])
             assert.deepStrictEqual(chanFilter, channel)
             done()
           }

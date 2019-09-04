@@ -10,6 +10,6 @@ describe('ws2:channels:pending_sub_data_count', () => {
       pendingSubscriptions: [['ticker', 'tBTCUSD'], ['nope', 42], ['trades', 'tBTCUSD']]
     })
 
-    assert.equal(count, 2)
+    assert.strictEqual(count, 2)
   })
 })

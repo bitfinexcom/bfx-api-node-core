@@ -50,8 +50,8 @@ describe('ws2:messages:auth', () => {
         emit: (eventName, packet = []) => {
           if (eventName === 'data:auth') {
             const [chanId, type, data, transformed] = packet
-            assert.equal(chanId, 0)
-            assert.equal(type, 'ps')
+            assert.strictEqual(chanId, 0)
+            assert.strictEqual(type, 'ps')
             assert.deepStrictEqual(data, [42])
             assert(transformed instanceof Position)
             done()
@@ -70,8 +70,8 @@ describe('ws2:messages:auth', () => {
         emit: (eventName, packet = []) => {
           if (eventName === 'data:auth') {
             const [chanId, type, data, transformed] = packet
-            assert.equal(chanId, 0)
-            assert.equal(type, 'ps')
+            assert.strictEqual(chanId, 0)
+            assert.strictEqual(type, 'ps')
             assert(data instanceof Position)
             assert(transformed instanceof Position)
             done()
