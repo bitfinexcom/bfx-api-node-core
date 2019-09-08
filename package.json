@@ -34,10 +34,10 @@
   },
   "homepage": "http://bitfinexcom.github.io/bfx-api-node-core/",
   "devDependencies": {
-    "bfx-api-mock-srv": "bitfinexcom/bfx-api-mock-srv",
-    "chai": "^3.4.1",
-    "mocha": "^3.4.2",
-    "standard": "^10.0.2"
+    "bfx-api-mock-srv": "^1.0.0",
+    "chai": "^4.2.0",
+    "mocha": "^6.2.0",
+    "standard": "^14.1.0"
   },
   "dependencies": {
     "bfx-api-node-plugin-seq-audit": "^1.0.0",
