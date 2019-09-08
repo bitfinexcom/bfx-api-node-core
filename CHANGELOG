@@ -1,0 +1,16 @@
+# 1.0.3
+- standard --fix
+- added changelog
+
+# 1.0.2
+- fix: update position of trades payload
+
+# 1.0.1
+- feature: ws2 tests
+- fix: filter heartbeats out of channel messages
+- fix: route ou-req notifications
+- fix: emit ws2:reopen event on reconnect
+- & more
+
+# 1.0.0
+- Initial version
