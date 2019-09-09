@@ -36,7 +36,7 @@ describe('ws2:flags:set', () => {
 
   it('updates flags on state', () => {
     const nextState = setFlag({ ...defaultState }, 42)
-    assert.equal(nextState.flags, 42)
+    assert.strictEqual(nextState.flags, 42)
   })
 
   it('emits flag update event', (done) => {
@@ -45,7 +45,7 @@ describe('ws2:flags:set', () => {
       ev: {
         emit: (eventName, data) => {
           if (eventName === 'exec:flags:set') {
-            assert.equal(data, 42)
+            assert.strictEqual(data, 42)
             done()
           }
         }

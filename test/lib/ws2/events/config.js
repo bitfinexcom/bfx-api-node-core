@@ -69,6 +69,6 @@ describe('ws2:events:config', () => {
 
   it('updates state flags if config succeeded', () => {
     const nextState = onConfigEvent(defaultState, successPacket)
-    assert.equal(nextState.flags, 0)
+    assert.strictEqual(nextState.flags, 0)
   })
 })

@@ -24,13 +24,13 @@ describe('ws2:auth', () => {
         send: (json) => {
           const msg = JSON.parse(json)
 
-          assert.equal(msg.event, 'auth')
-          assert.equal(msg.apiKey, 'key')
+          assert.strictEqual(msg.event, 'auth')
+          assert.strictEqual(msg.apiKey, 'key')
           assert(msg.authSig)
           assert(msg.authPayload)
           assert(msg.authNonce)
-          assert.equal(msg.dms, 4)
-          assert.equal(msg.calc, 0)
+          assert.strictEqual(msg.dms, 4)
+          assert.strictEqual(msg.calc, 0)
           done()
         }
       }

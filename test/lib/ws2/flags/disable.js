@@ -22,6 +22,6 @@ describe('ws2:flags:disable', () => {
       flags: 42
     }, 42, true)
 
-    assert.equal(nextState.flags, 0)
+    assert.strictEqual(nextState.flags, 0)
   })
 })

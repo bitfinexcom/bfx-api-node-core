@@ -16,7 +16,7 @@ describe('ws2:events:error', () => {
       ...defaultState,
       emit: (eventName, error) => {
         if (eventName === 'event:error') {
-          assert.equal(error, err)
+          assert.strictEqual(error, err)
           done()
         }
       }
@@ -30,7 +30,7 @@ describe('ws2:events:error', () => {
       ...defaultState,
       emit: (eventName, error) => {
         if (eventName === 'error') {
-          assert.equal(error, err)
+          assert.strictEqual(error, err)
           done()
         }
       }

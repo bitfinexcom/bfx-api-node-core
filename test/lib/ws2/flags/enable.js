@@ -18,6 +18,6 @@ const defaultState = {
 describe('ws2:flags:enable', () => {
   it('sets flags to new flag set after adding single flag', () => {
     const nextState = enableFlag({ ...defaultState }, 42, true)
-    assert.equal(nextState.flags, 42)
+    assert.strictEqual(nextState.flags, 42)
   })
 })
