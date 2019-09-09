@@ -1,3 +1,16 @@
+# 1.1.1
+- add travis config
+- add Github issue/PR templates
+- add changelog
+- add examples
+- populate README
+- manifest: bump dependencies
+- manifest: rm bfx-api-node-plugin-seq-audit & usage
+
+# 1.1.0
+- refactor: update state-inplace for subscribe/unsubscribe/flags set
+- fix: check for payload on both possible indices in trades packet
+
 # 1.0.3
 - standard --fix
 - added changelog
