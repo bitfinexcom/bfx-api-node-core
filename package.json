@@ -33,7 +33,6 @@
   "homepage": "http://bitfinexcom.github.io/bfx-api-node-core/",
   "devDependencies": {
     "babel-eslint": "^10.0.3",
-    "bfx-api-mock-srv": "^1.0.0",
     "chai": "^4.2.0",
     "mocha": "^6.2.0",
     "standard": "^14.1.0"
