@@ -9,12 +9,9 @@ const WSv1 = require('bfx-api-node-ws1')
 const Promise = require('bluebird')
 
 const { RESTv1, RESTv2 } = require('bfx-api-node-rest')
-const SeqAuditPlugin = require('bfx-api-node-plugin-seq-audit')
 
-const Config = require('./lib/config')
 const Manager = require('./lib/manager')
 const sendWS = require('./lib/ws2/send')
-const setFlagWS = require('./lib/ws2/flags/set')
 const submitOrderWS = require('./lib/ws2/orders/submit')
 const updateOrderWS = require('./lib/ws2/orders/update')
 const cancelOrderWS = require('./lib/ws2/orders/cancel')
@@ -375,34 +372,6 @@ module.exports = class LegacyWrapper extends EventEmitter {
     return new Promise((resolve, reject) => {
       this._manager.withAuthSocket((state = {}) => {
         updateOrderWS(state, changes).then(resolve).catch(reject)
-      })
-    })
-  }
-
-  enableSequencing ({ audit } = {}) {
-    if (!this._manager) {
-      return
-    }
-
-    if (audit && !this._manager.hasPlugin(SeqAuditPlugin)) {
-      this._manager.addPlugin(SeqAuditPlugin)
-    }
-
-    return new Promise((resolve, reject) => {
-      this._manager.withSocket((state = {}) => {
-        const { ev } = state
-
-        ev.once('event:config', (msg = {}) => {
-          const { status } = msg
-
-          if (status !== 'OK') {
-            reject(msg)
-          } else {
-            resolve(msg)
-          }
-        })
-
-        return setFlagWS(state, Config.FLAGS.SEQ_ALL)
       })
     })
   }

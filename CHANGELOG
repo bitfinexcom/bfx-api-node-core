@@ -1,0 +1,29 @@
+# 1.1.1
+- add travis config
+- add Github issue/PR templates
+- add changelog
+- add examples
+- populate README
+- manifest: bump dependencies
+- manifest: rm bfx-api-node-plugin-seq-audit & usage
+
+# 1.1.0
+- refactor: update state-inplace for subscribe/unsubscribe/flags set
+- fix: check for payload on both possible indices in trades packet
+
+# 1.0.3
+- standard --fix
+- added changelog
+
+# 1.0.2
+- fix: update position of trades payload
+
+# 1.0.1
+- feature: ws2 tests
+- fix: filter heartbeats out of channel messages
+- fix: route ou-req notifications
+- fix: emit ws2:reopen event on reconnect
+- & more
+
+# 1.0.0
+- Initial version
