@@ -1,6 +1,6 @@
 {
   "name": "bfx-api-node-core",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Core Bitfinex Node API",
   "engines": {
     "node": ">=7"
@@ -9,7 +9,10 @@
   "scripts": {
     "lint": "standard",
     "test": "npm run lint && npm run unit",
-    "unit": "NODE_PATH=lib/ NODE_ENV=test mocha -b --recursive"
+    "unit": "NODE_PATH=lib/ NODE_ENV=test mocha -b --recursive",
+    "docs": "npm run manager_docs && npm run ws2_func_docs",
+    "manager_docs": "node_modules/jsdoc-to-markdown/bin/cli.js lib/manager.js > docs/manager_docs.md",
+    "ws2_func_docs": "node_modules/jsdoc-to-markdown/bin/cli.js lib/ws2/*.js lib/ws2/orders/*.js lib/ws2/flags/*.js > docs/ws2_funcs.md"
   },
   "repository": {
     "type": "git",
@@ -34,6 +37,7 @@
   "devDependencies": {
     "babel-eslint": "^10.0.3",
     "chai": "^4.2.0",
+    "jsdoc-to-markdown": "^5.0.1",
     "mocha": "^6.2.0",
     "standard": "^14.1.0"
   },

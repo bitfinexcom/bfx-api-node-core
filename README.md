@@ -1,15 +1,47 @@
-# bfx-api-node-core
+# Bitfinex Modular WSv2 API Library for Node.JS
 
 [![Build Status](https://travis-ci.org/bitfinexcom/bfx-api-node-core.svg?branch=master)](https://travis-ci.org/bitfinexcom/bfx-api-node-core)
 
-Modular Bitfinex Node.JS API library as an alternative to `bitfinex-api-node`, supporting a plugin system.
+Modular Bitfinex Node.JS API library as an alternative to `bitfinex-api-node`, supporting a plugin system. Connection instances are POJOs as opposed to the
+WSv2 class instances returned by `bitfinex-api-node` and are manipulated in a
+functional style. A connection pool manager is also provided for multiplexing.
 
-### Example: Subscribing to candles
+### Features
+
+* POJO connection instances
+* Multiplexing connection pool manager
+* Plugin system for extending the default events
+
+### Installation
+
+```bash
+npm i --save bfx-api-node-core
+```
+
+### Quickstart
+
 ```js
-'use strict'
+const { Manager, initState } = require('bfx-api-node-core')
 
-process.env.DEBUG = '*'
+// Create a Manager instance with an internal connection pool, and add a
+// connection to the pool
+const m = new Manager({ transform: true })
+const managedConnection = m.openWS()
 
+// Alternatively, create & open a single connection yourself
+const connection = initState({ transform: true })
+
+// do something with connections, see below for examples
+```
+
+### Docs
+
+See `docs/manager_docs.md` for the Manager class documentation, and `docs/ws2_funcs.md` for documentation on the functions available for manipulating a connection instance.
+
+### Examples
+
+Subscribing to a candle channel:
+```js
 const debug = require('debug')('bfx:api:core:examples:candles')
 const { subscribe, Manager } = require('../')
 
@@ -42,12 +74,8 @@ debug('subscribing to candles channel %s', CANDLE_KEY)
 subscribe(wsState, 'candles', { key: CANDLE_KEY })
 ```
 
-### Example: Using a plugin
+Using a plugin:
 ```js
-'use strict'
-
-process.env.DEBUG = '*'
-
 const debug = require('debug')('bfx:api:core:examples:candles')
 const Watchdog = require('bfx-api-node-plugin-wd')
 const { Manager } = require('../')
@@ -68,3 +96,11 @@ m.openWS()
 
 debug('awaiting watchdog trigger [no subscriptions]')
 ```
+
+### Contributing
+
+1. Fork it
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create a new Pull Request
