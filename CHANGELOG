@@ -1,3 +1,7 @@
+# 1.1.2
+- docs: create/update
+- fix: default channel limit in Manager constructor
+
 # 1.1.1
 - add travis config
 - add Github issue/PR templates
