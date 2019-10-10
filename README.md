@@ -36,7 +36,7 @@ const connection = initState({ transform: true })
 
 ### Docs
 
-See `docs/manager_docs.md` for the Manager class documentation, and `docs/ws2_funcs.md` for documentation on the functions available for manipulating a connection instance.
+[`See docs/manager_docs.md`](/docs/manager_docs.md) for the Manager class documentation, and [`docs/ws2_funcs.md`](/docs/ws2_funcs.md) for documentation on the functions available for manipulating a connection instance.
 
 ### Examples
 
