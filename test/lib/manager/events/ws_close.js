@@ -2,7 +2,7 @@
 'use strict'
 
 const assert = require('assert')
-const wsClose = require('manager/events/ws_close')
+const wsClose = require('../../../../lib/manager/events/ws_close')
 
 describe('manager:events:ws_close', () => {
   it('emits selected ws id when ws found in wsPool', () => {

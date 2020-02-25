@@ -2,7 +2,7 @@
 'use strict'
 
 const assert = require('assert')
-const updateOrder = require('ws2/orders/update')
+const updateOrder = require('../../../../lib/ws2/orders/update')
 
 const defaultState = {
   ev: {

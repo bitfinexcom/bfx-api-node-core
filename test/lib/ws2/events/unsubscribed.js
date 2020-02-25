@@ -2,7 +2,7 @@
 'use strict'
 
 const assert = require('assert')
-const onUnsubscribedEvent = require('ws2/events/unsubscribed')
+const onUnsubscribedEvent = require('../../../../lib/ws2/events/unsubscribed')
 
 const defaultState = {
   pendingUnsubscriptions: [],

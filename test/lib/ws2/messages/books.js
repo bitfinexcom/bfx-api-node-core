@@ -2,7 +2,7 @@
 'use strict'
 
 const assert = require('assert')
-const onBooksMessage = require('ws2/messages/books')
+const onBooksMessage = require('../../../../lib/ws2/messages/books')
 const { OrderBook } = require('bfx-api-node-models')
 
 const defaultState = {

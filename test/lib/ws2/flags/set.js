@@ -2,7 +2,7 @@
 'use strict'
 
 const assert = require('assert')
-const setFlag = require('ws2/flags/set')
+const setFlag = require('../../../../lib/ws2/flags/set')
 
 const defaultState = {
   isOpen: true,

@@ -2,7 +2,7 @@
 'use strict'
 
 const assert = require('assert')
-const onTradesMessage = require('ws2/messages/trades')
+const onTradesMessage = require('../../../../lib/ws2/messages/trades')
 const { Trade, PublicTrade } = require('bfx-api-node-models')
 
 const defaultState = {

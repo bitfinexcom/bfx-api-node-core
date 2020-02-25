@@ -2,7 +2,7 @@
 'use strict'
 
 const assert = require('assert')
-const onAuthMessage = require('ws2/messages/auth')
+const onAuthMessage = require('../../../../lib/ws2/messages/auth')
 const { Position } = require('bfx-api-node-models')
 
 const defaultState = {

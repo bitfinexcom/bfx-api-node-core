@@ -2,7 +2,7 @@
 'use strict'
 
 const assert = require('assert')
-const onCandlesMessage = require('ws2/messages/candles')
+const onCandlesMessage = require('../../../../lib/ws2/messages/candles')
 const _isObject = require('lodash/isObject')
 
 const defaultState = {
