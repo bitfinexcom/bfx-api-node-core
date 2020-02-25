@@ -2,7 +2,7 @@
 'use strict'
 
 const assert = require('assert')
-const onErrorEvent = require('ws2/events/error')
+const onErrorEvent = require('../../../../lib/ws2/events/error')
 
 const defaultState = {
   emit: () => {}

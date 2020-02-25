@@ -2,7 +2,7 @@
 'use strict'
 
 const assert = require('assert')
-const onConfigEvent = require('ws2/events/config')
+const onConfigEvent = require('../../../../lib/ws2/events/config')
 
 const defaultState = {
   emit: () => {}

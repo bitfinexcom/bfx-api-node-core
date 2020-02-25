@@ -2,7 +2,7 @@
 'use strict'
 
 const assert = require('assert')
-const cancelOrder = require('ws2/orders/cancel')
+const cancelOrder = require('../../../../lib/ws2/orders/cancel')
 const { Order } = require('bfx-api-node-models')
 
 const defaultState = {

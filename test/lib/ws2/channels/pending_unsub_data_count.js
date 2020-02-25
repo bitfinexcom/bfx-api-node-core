@@ -2,7 +2,7 @@
 'use strict'
 
 const assert = require('assert')
-const pendingUnsubDataCount = require('ws2/channels/pending_unsub_data_count')
+const pendingUnsubDataCount = require('../../../../lib/ws2/channels/pending_unsub_data_count')
 
 describe('ws2:channels:pending_unsub_data_count', () => {
   it('returns the number of pending data unsubscriptions', () => {

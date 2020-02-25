@@ -2,7 +2,7 @@
 'use strict'
 
 const assert = require('assert')
-const auth = require('ws2/auth')
+const auth = require('../../../lib/ws2/auth')
 
 const defaultState = {
   isOpen: true,

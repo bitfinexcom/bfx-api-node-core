@@ -2,7 +2,7 @@
 'use strict'
 
 const assert = require('assert')
-const submitOrder = require('ws2/orders/submit')
+const submitOrder = require('../../../../lib/ws2/orders/submit')
 const { Order } = require('bfx-api-node-models')
 
 const defaultState = {

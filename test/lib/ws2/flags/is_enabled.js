@@ -2,8 +2,8 @@
 'use strict'
 
 const assert = require('assert')
-const isFlagEnabled = require('ws2/flags/is_enabled')
-const Config = require('config')
+const isFlagEnabled = require('../../../../lib/ws2/flags/is_enabled')
+const Config = require('../../../../lib/config')
 
 const state = {
   flags: Config.FLAGS.SEQ_ALL + Config.FLAGS.OB_CHECKSUM

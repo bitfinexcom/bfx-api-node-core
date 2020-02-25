@@ -2,7 +2,7 @@
 'use strict'
 
 const assert = require('assert')
-const onAuthEvent = require('ws2/events/auth')
+const onAuthEvent = require('../../../../lib/ws2/events/auth')
 
 const defaultState = {
   channels: {},

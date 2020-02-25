@@ -2,7 +2,7 @@
 'use strict'
 
 const assert = require('assert')
-const disableFlag = require('ws2/flags/disable')
+const disableFlag = require('../../../../lib/ws2/flags/disable')
 
 const defaultState = {
   flags: 0,

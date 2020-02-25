@@ -2,7 +2,7 @@
 'use strict'
 
 const assert = require('assert')
-const onNotificationMessage = require('ws2/messages/notifications')
+const onNotificationMessage = require('../../../../lib/ws2/messages/notifications')
 const { Notification } = require('bfx-api-node-models')
 
 const defaultState = {

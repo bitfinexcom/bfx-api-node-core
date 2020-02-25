@@ -2,7 +2,7 @@
 'use strict'
 
 const assert = require('assert')
-const onTickersMessage = require('ws2/messages/tickers')
+const onTickersMessage = require('../../../../lib/ws2/messages/tickers')
 const { TradingTicker, FundingTicker } = require('bfx-api-node-models')
 
 const defaultState = {
