@@ -1,5 +1,5 @@
 # 1.1.8
-- fix: refactor tests so they can run alongside all other HF/API library tests
+- fix: use relative paths to allow generic mocha execution
 
 # 1.1.7
 - feature: add updateAuthargs() to manager
