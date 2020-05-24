@@ -1,3 +1,8 @@
+# 1.1.9
+- feature: export getWSDataChannelCount
+- feature: export getPendingSubscriptionCount
+- feature: export getPendingUnsubscriptionCount
+
 # 1.1.8
 - fix: use relative paths to allow generic mocha execution
 
