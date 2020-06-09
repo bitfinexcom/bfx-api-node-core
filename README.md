@@ -2,7 +2,8 @@
 
 [![Build Status](https://travis-ci.org/bitfinexcom/bfx-api-node-core.svg?branch=master)](https://travis-ci.org/bitfinexcom/bfx-api-node-core)
 
-Modular Bitfinex Node.JS API library as an alternative to `bitfinex-api-node`, supporting a plugin system. Connection instances are POJOs as opposed to the
+Modular Bitfinex Node.JS API library as an alternative to `bitfinex-api-node`,
+supporting a plugin system. Connection instances are POJOs as opposed to the
 WSv2 class instances returned by `bitfinex-api-node` and are manipulated in a
 functional style. A connection pool manager is also provided for multiplexing.
 
@@ -36,7 +37,8 @@ const connection = initState({ transform: true })
 
 ### Docs
 
-[`See docs/manager_docs.md`](/docs/manager_docs.md) for the Manager class documentation, and [`docs/ws2_funcs.md`](/docs/ws2_funcs.md) for documentation on the functions available for manipulating a connection instance.
+See [`docs/reference.md`](docs/reference.md) for API documentation, and
+[`examples/`](examples) for examples of usage.
 
 ### Examples
 

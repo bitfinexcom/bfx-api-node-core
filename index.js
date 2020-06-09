@@ -8,48 +8,37 @@ const ws2 = require('./lib/ws2')
 
 /**
  * Modular Bitfinex Node.JS API library as an alternative to
- * {@link module:bitfinex-api-node|bitfinex-api-node}, supporting a plugin
- * system. Connection instances are POJOs as opposed to the WSv2 class
- * instances returned by {@link module:bitfinex-api-node|bitfinex-api-node} and
- * are manipulated in a functional style. A connection pool manager is also
+ * {@link external:bitfinex-api-node|bitfinex-api-node}, supporting a plugin
+ * system. Connection instances are POJOs as opposed to the `WSv2` class
+ * instances returned by
+ * {@link external:bitfinex-api-node|bitfinex-api-node} and are manipulated in
+ * a functional style. A {@link Manager|connection pool manager} is also
  * provided for multiplexing.
- *
- * ### Features
- *
- * * POJO connection instances
- * * Multiplexing connection pool manager
- * * Plugin system for extending the default events
  *
  * ### Available Plugins
  *
- * * {@link module:bfx-api-node-plugin-example|bfx-api-node-plugin-example} -
+ * * {@link external:bfx-api-node-plugin-example|bfx-api-node-plugin-example} -
  *   skeleton plugin that serves as a reference for the required structure.
- * * {@link module:bfx-api-node-plugin-managed-candles|bfx-api-node-plugin-managed-candles} -
+ * * {@link external:bfx-api-node-plugin-managed-candles|bfx-api-node-plugin-managed-candles} -
  *   maintains an updated candle dataset and provides events to access it on
  *   each update.
- * * {@link module:bfx-api-node-plugin-managed-ob|bfx-api-node-plugin-managed-ob} -
+ * * {@link external:bfx-api-node-plugin-managed-ob|bfx-api-node-plugin-managed-ob} -
  *   maintains an updated full order book copy for each subscribed book
  *   channel, and provides events to access it on each update.
- * * {@link module:bfx-api-node-plugin-ob-checksum|bfx-api-node-plugin-ob-checksum} -
+ * * {@link external:bfx-api-node-plugin-ob-checksum|bfx-api-node-plugin-ob-checksum} -
  *   maintains local order books for each subscribed book channel and performs
  *   automatic checksum verification, emitting a custom event on checksum
  *   mismatch.
- * * {@link module:bfx-api-node-plugin-seq-audit|bfx-api-node-plugin-seq-audit} -
+ * * {@link external:bfx-api-node-plugin-seq-audit|bfx-api-node-plugin-seq-audit} -
  *   enables sequence numbers and performs automatic verification, emitting a
  *   custom event on sequence number mismatch.
- * * {@link module:bfx-api-node-plugin-wd|bfx-api-node-plugin-wd} - implements
+ * * {@link external:bfx-api-node-plugin-wd|bfx-api-node-plugin-wd} - implements
  *   a connection watchdog, automatically reconnecting if no new packets are
  *   received within the configured grace period.
  *
- * ### Installation
- *
- * ```bash
- * npm i --save bfx-api-node-core
- * ```
- *
- * ### Quickstart
- *
- * ```js
+ * @license MIT
+ * @module bfx-api-node-core
+ * @example
  * const { Manager, initState } = require('bfx-api-node-core')
  *
  * // Create a Manager instance with an internal connection pool, and add a
@@ -60,11 +49,42 @@ const ws2 = require('./lib/ws2')
  * // Alternatively, create & open a single connection yourself
  * const connection = initState({ transform: true })
  *
- * // do something with connections, see below for examples
- * ```
- *
- * @license MIT
- * @module bfx-api-node-core
+ * // do something with connections
+ */
+
+/**
+ * @external bitfinex-api-node
+ * @see https://github.com/bitfinexcom/bitfinex-api-node
+ */
+
+/**
+ * @external bfx-api-node-plugin-example
+ * @see https://github.com/bitfinexcom/bfx-api-node-plugin-example
+ */
+
+/**
+ * @external bfx-api-node-plugin-managed-candles
+ * @see https://github.com/bitfinexcom/bfx-api-node-plugin-managed-candles
+ */
+
+/**
+ * @external bfx-api-node-plugin-managed-ob
+ * @see https://github.com/bitfinexcom/bfx-api-node-plugin-managed-ob
+ */
+
+/**
+ * @external bfx-api-node-plugin-ob-checksum
+ * @see https://github.com/bitfinexcom/bfx-api-node-plugin-ob-checksum
+ */
+
+/**
+ * @external bfx-api-node-plugin-seq-audit
+ * @see https://github.com/bitfinexcom/bfx-api-node-plugin-seq-audit
+ */
+
+/**
+ * @external bfx-api-node-plugin-wd
+ * @see https://github.com/bitfinexcom/bfx-api-node-plugin-wd
  */
 
 module.exports = {

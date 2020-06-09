@@ -1,4 +1,7 @@
 # 1.1.9
+- meta: standardize eslint config
+- fix: add missing ws dep
+- feature: improve JSDoc doclets
 - feature: export getWSDataChannelCount
 - feature: export getPendingSubscriptionCount
 - feature: export getPendingUnsubscriptionCount

@@ -2,6 +2,7 @@
 'use strict'
 
 const assert = require('assert')
+const _isError = require('lodash/isError')
 const onAuthEvent = require('../../../../lib/ws2/events/auth')
 
 const defaultState = {
@@ -39,7 +40,7 @@ describe('ws2:events:auth', () => {
       ...defaultState,
       emit: (eventName, data) => {
         if (eventName === 'error') {
-          assert(data instanceof Error)
+          assert(_isError(data))
           done()
         }
       }

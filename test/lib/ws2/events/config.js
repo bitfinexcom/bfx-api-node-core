@@ -2,6 +2,7 @@
 'use strict'
 
 const assert = require('assert')
+const _isError = require('lodash/isError')
 const onConfigEvent = require('../../../../lib/ws2/events/config')
 
 const defaultState = {
@@ -36,7 +37,7 @@ describe('ws2:events:config', () => {
       ...defaultState,
       emit: (eventName, data) => {
         if (eventName === 'error') {
-          assert(data instanceof Error)
+          assert(_isError(data))
           done()
         }
       }
