@@ -131,9 +131,8 @@ open.</p>
 
 <dl>
 <dt><a href="#AuthArgs">AuthArgs</a> : <code>object</code></dt>
-<dd><p>Socket authentication arguments, provided to
-<a href="module:bitfinex-api-node.WSv2">WSv2</a> clients by the
-<a href="#Manager">Manager</a></p>
+<dd><p>Socket authentication arguments, provided to WSv2 clients by the
+<a href="#Manager">Manager</a>.</p>
 </dd>
 <dt><a href="#FullAuthArgs">FullAuthArgs</a> : <code><a href="#AuthArgs">AuthArgs</a></code></dt>
 <dd><p>Like <a href="#AuthArgs">AuthArgs</a> but with API
@@ -811,7 +810,7 @@ specified delay.
 | --- | --- | --- |
 | state | [<code>SocketState</code>](#SocketState) | socket |
 | delay | <code>number</code> | in ms |
-| o | <code>module:bfx-api-node-models.Order</code> \| <code>module:bfx-api-node-models.Order~Data</code> | order |
+| o | <code>bfx-api-node-models.Order</code> \| <code>bfx-api-node-models.Order~Data</code> | order |
 
 <a name="cancelOrder"></a>
 
@@ -824,7 +823,7 @@ Cancels an order from either an order object, array, or raw ID.
 | Param | Type | Description |
 | --- | --- | --- |
 | state | [<code>SocketState</code>](#SocketState) | socket |
-| order | <code>module:bfx-api-node-models.Order</code> \| <code>module:bfx-api-node-models.Order~Data</code> | order |
+| order | <code>bfx-api-node-models.Order</code> \| <code>bfx-api-node-models.Order~Data</code> | order |
 
 <a name="submitOrderWithDelay"></a>
 
@@ -839,7 +838,7 @@ specified delay.
 | --- | --- | --- |
 | state | [<code>SocketState</code>](#SocketState) | socket |
 | delay | <code>number</code> | in ms |
-| o | <code>module:bfx-api-node-models.Order</code> \| <code>module:bfx-api-node-models.Order~Data</code> | order |
+| o | <code>bfx-api-node-models.Order</code> \| <code>bfx-api-node-models.Order~Data</code> | order |
 
 <a name="submitOrder"></a>
 
@@ -852,7 +851,7 @@ Submits an order with either an order model or raw order object.
 | Param | Type | Description |
 | --- | --- | --- |
 | state | [<code>SocketState</code>](#SocketState) | socket |
-| order | <code>module:bfx-api-node-models.Order</code> \| <code>module:bfx-api-node-models.Order~Data</code> | order |
+| order | <code>bfx-api-node-models.Order</code> \| <code>bfx-api-node-models.Order~Data</code> | order |
 
 <a name="updateOrder"></a>
 
@@ -924,9 +923,8 @@ open.
 <a name="AuthArgs"></a>
 
 ## AuthArgs : <code>object</code>
-Socket authentication arguments, provided to
-[WSv2](module:bitfinex-api-node.WSv2) clients by the
-[Manager](#Manager)
+Socket authentication arguments, provided to WSv2 clients by the
+[Manager](#Manager).
 
 **Kind**: global typedef  
 **Properties**
@@ -1074,7 +1072,7 @@ A single Bitfinex WebSocket v2 API connection, and all associated state/data
 | sendBuffer | <code>Array.&lt;Array&gt;</code> |  | array of packets to be sent once the   connection is established; used to buffer packets sent prior to connect. |
 | [apiKey] | <code>string</code> |  | api key |
 | [apiSecret] | <code>string</code> |  | api secret |
-| [transform] | <code>boolean</code> | <code>false</code> | enables automatic transformation of   incoming data to models from   [bfx-api-node-models](module:bfx-api-node-models) |
+| [transform] | <code>boolean</code> | <code>false</code> | enables automatic transformation of   incoming data to models |
 | [agent] | <code>function</code> |  | connection agent |
 | ev | <code>EventEmitter</code> |  | socket event emitter |
 | emit | <code>function</code> |  | wrapper around `ev.emit` inside a   `setTimeout(..., 0)` call |
