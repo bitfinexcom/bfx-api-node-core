@@ -41,6 +41,7 @@ opening new sockets/closing existing one as needed.
 | args.agent | <code>Object</code> | connection agent |
 | args.apiKey | <code>string</code> | used to authenticate sockets |
 | args.apiSecret | <code>string</code> | used to authenticate sockets |
+| args.authToken | <code>string</code> | used to authenticate sockets; has priority over API key/secret |
 | args.autoResubscribe | <code>boolean</code> | default true |
 | args.channelsPerSocket | <code>number</code> | defaults to 30 |
 | args.dms | <code>number</code> | dead-man-switch flag sent on auth, active 4 |
@@ -81,6 +82,7 @@ Authenticates all open API connections
 | args | <code>Object</code> | optional, defaults to values provided to constructor |
 | args.apiKey | <code>string</code> |  |
 | args.apiSecret | <code>string</code> |  |
+| args.authToken | <code>string</code> |  optional, has priority over API key/secret|
 | args.dms | <code>number</code> | dead man switch, active 4 |
 | args.calc | <code>number</code> |  |
 
