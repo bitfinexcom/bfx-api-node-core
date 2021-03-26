@@ -87,6 +87,7 @@ Creates & opens a WSv2 API connection, and returns the resulting state object
 | opts.transform | <code>boolean</code> | if true, raw API data arrays will be automatically converted to bfx-api-node-models instances |
 | opts.apiKey | <code>string</code> | for later authentication |
 | opts.apiSecret | <code>string</code> | for later authentication |
+| args.authToken | <code>string</code> |  for later authentication; optional, has priority over API key/secret|
 | opts.plugins | <code>Object</code> | optional set of plugins to use with the connection |
 
 <a name="open"></a>
