@@ -7,7 +7,7 @@ const dataCount = require('../../../../lib/ws2/channels/data_count')
 describe('ws2:channels:data_count', () => {
   it('returns the number of subscriptions plus pending subs, minus pending unsubs', () => {
     const countA = dataCount({
-      pendingSubscriptions: [['ticker', 'tBTCUSD']],
+      pendingSubscriptions: [{ channel: 'ticker', symbol: 'tBTCUSD' }],
       pendingUnsubscriptions: [42],
       channels: {
         0: { channel: 'auth' },
@@ -16,7 +16,7 @@ describe('ws2:channels:data_count', () => {
     })
 
     const countB = dataCount({
-      pendingSubscriptions: [['ticker', 'tBTCUSD']],
+      pendingSubscriptions: [{ channel: 'ticker', symbol: 'tBTCUSD' }],
       pendingUnsubscriptions: [],
       channels: {
         0: { channel: 'auth' },

@@ -17,12 +17,11 @@ describe('ws2:subscribe', () => {
       prec: 'R0',
       len: '25'
     })
-    assert.deepStrictEqual(nextState.pendingSubscriptions, [[
-      'book', {
-        prec: 'R0',
-        len: '25'
-      }
-    ]])
+    assert.deepStrictEqual(nextState.pendingSubscriptions, [{
+      channel: 'book',
+      prec: 'R0',
+      len: '25'
+    }])
   })
 
   it('prevent duplicate pending subscriptions', () => {
@@ -34,11 +33,10 @@ describe('ws2:subscribe', () => {
       prec: 'R0',
       len: '25'
     })
-    assert.deepStrictEqual(nextState2.pendingSubscriptions, [[
-      'book', {
-        prec: 'R0',
-        len: '25'
-      }
-    ]])
+    assert.deepStrictEqual(nextState2.pendingSubscriptions, [{
+      channel: 'book',
+      prec: 'R0',
+      len: '25'
+    }])
   })
 })

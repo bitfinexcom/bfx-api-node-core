@@ -7,7 +7,7 @@ const pendingSubDataCount = require('../../../../lib/ws2/channels/pending_sub_da
 describe('ws2:channels:pending_sub_data_count', () => {
   it('returns the number of pending data subscriptions', () => {
     const count = pendingSubDataCount({
-      pendingSubscriptions: [['ticker', 'tBTCUSD'], ['nope', 42], ['trades', 'tBTCUSD']]
+      pendingSubscriptions: [{ channel: 'ticker', symbol: 'tBTCUSD' }, { channel: 'nope', symbol: 42 }, { channel: 'trades', symbol: 'tBTCUSD' }]
     })
 
     assert.strictEqual(count, 2)
