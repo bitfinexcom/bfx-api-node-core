@@ -35,23 +35,23 @@ describe('ws2:events:subscribed', () => {
     const nextState = onSubscribedEvent({
       ...defaultState,
       pendingSubscriptions: [
-        ['book', {
+        {
+          channel: 'book',
           prec: 'R0',
           len: '25'
-        }],
-
-        ['trades', {
+        },
+        {
+          channel: 'trades',
           symbol: 'tBTCUSD'
-        }]
+        }
       ]
     }, packet)
 
-    assert.deepStrictEqual(nextState.pendingSubscriptions, [[
-      'book', {
-        prec: 'R0',
-        len: '25'
-      }
-    ]])
+    assert.deepStrictEqual(nextState.pendingSubscriptions, [{
+      channel: 'book',
+      prec: 'R0',
+      len: '25'
+    }])
   })
 
   it('creates channel in state channel map', () => {
