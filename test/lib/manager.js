@@ -1,4 +1,5 @@
 /* eslint-env mocha */
+/* eslint-disable no-unused-expressions */
 'use strict'
 
 const { expect } = require('chai')
@@ -24,6 +25,10 @@ const Manager = proxyquire('../../lib/manager', {
 })
 
 describe('manager', () => {
+  afterEach(() => {
+    sandbox.reset()
+  })
+
   after(() => {
     sandbox.restore()
   })
@@ -41,12 +46,26 @@ describe('manager', () => {
       restURL: 'rest url'
     }
 
+    sandbox.stub(Date, 'now').returns(0)
+
+    it('should schedule token renewal', async () => {
+      const expiresAt = 24 * 60 * 60
+      const instance = new Manager({
+        ...args,
+        authTokenExpiresAt: expiresAt
+      })
+
+      expect(instance.authToken).to.eq(args.authToken)
+      expect(instance.authTokenExpiresAt).to.eq(expiresAt)
+      expect(instance._renewTimeout).not.to.be.undefined
+      clearTimeout(instance._renewTimeout)
+    })
+
     it('immediately renew token if expiresAt is not provided', async () => {
       const newToken = {
         token: 'new token',
         expiresAt: 100
       }
-      sandbox.stub(Date, 'now').returns(0)
       renewAuthTokenStub.resolves(newToken)
 
       const instance = new Manager({
@@ -78,9 +97,22 @@ describe('manager', () => {
       })
       expect(instance.authToken).to.eq(newToken.token)
       expect(instance.authTokenExpiresAt).to.eq(newToken.expiresAt)
-      // eslint-disable-next-line no-unused-expressions
       expect(instance._renewTimeout).not.to.be.undefined
       clearTimeout(instance._renewTimeout)
+    })
+
+    it('should not schedule token renewal if not using auth tokens', async () => {
+      const instance = new Manager({
+        ...args,
+        authToken: undefined,
+        userId: undefined,
+        authTokenExpiresAt: undefined
+      })
+
+      assert.notCalled(renewAuthTokenStub)
+      expect(instance.authToken).to.be.undefined
+      expect(instance.authTokenExpiresAt).to.be.undefined
+      expect(instance._renewTimeout).to.be.undefined
     })
   })
 })
