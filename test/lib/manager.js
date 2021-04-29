@@ -5,6 +5,7 @@
 const { expect } = require('chai')
 const { createSandbox, assert } = require('sinon')
 const proxyquire = require('proxyquire')
+const EventEmitter = require('events')
 
 const { delay } = require('../utils')
 
@@ -12,6 +13,7 @@ const sandbox = createSandbox()
 const renewAuthTokenStub = sandbox.stub()
 const RESTv2ConstructorStub = sandbox.stub()
 const debugStub = sandbox.stub()
+const WsStateConstructorStub = sandbox.stub()
 
 const Manager = proxyquire('../../lib/manager', {
   './manager/auth': {
@@ -23,7 +25,16 @@ const Manager = proxyquire('../../lib/manager', {
       return {}
     })
   },
-  debug: () => debugStub
+  debug: () => debugStub,
+  './ws2/init_state': sandbox.spy((opts) => {
+    WsStateConstructorStub(opts)
+
+    return {
+      id: 'ws id',
+      ev: new EventEmitter(),
+      sendBuffer: []
+    }
+  })
 })
 
 describe('manager', () => {
@@ -44,19 +55,27 @@ describe('manager', () => {
       authTokenExpiresAt: '100',
       authURL: 'auth url',
       transform: 'transform',
-      agent: 'agent',
-      restURL: 'rest url'
+      agent: false,
+      restURL: 'rest url',
+      wsURL: 'ws url',
+      calc: 'calc',
+      dms: 'dms'
     }
 
-    sandbox.stub(Date, 'now').returns(0)
+    const expiresAt = 24 * 60 * 60
+    const dateNowStub = sandbox.stub(Date, 'now')
+
+    beforeEach(() => {
+      dateNowStub.returns(0)
+    })
 
     it('should schedule token renewal', async () => {
-      const expiresAt = 24 * 60 * 60
       const instance = new Manager({
         ...args,
         authTokenExpiresAt: expiresAt
       })
 
+      assert.notCalled(renewAuthTokenStub)
       expect(instance.authToken).to.eq(args.authToken)
       expect(instance.authTokenExpiresAt).to.eq(expiresAt)
       expect(instance._renewTimeout).not.to.be.undefined
@@ -66,7 +85,7 @@ describe('manager', () => {
     it('immediately renew token if expiresAt is not provided', async () => {
       const newToken = {
         token: 'new token',
-        expiresAt: 100
+        expiresAt
       }
       renewAuthTokenStub.resolves(newToken)
 
@@ -76,6 +95,10 @@ describe('manager', () => {
       })
       await delay(100)
 
+      expect(instance.authToken).to.eq(newToken.token)
+      expect(instance.authTokenExpiresAt).to.eq(newToken.expiresAt)
+      expect(instance._renewTimeout).not.to.be.undefined
+      clearTimeout(instance._renewTimeout)
       assert.calledWithExactly(renewAuthTokenStub, {
         authURL: args.authURL,
         userId: args.userId,
@@ -97,10 +120,6 @@ describe('manager', () => {
         agent: args.agent,
         url: args.restURL
       })
-      expect(instance.authToken).to.eq(newToken.token)
-      expect(instance.authTokenExpiresAt).to.eq(newToken.expiresAt)
-      expect(instance._renewTimeout).not.to.be.undefined
-      clearTimeout(instance._renewTimeout)
     })
 
     it('should not schedule token renewal if not using auth tokens', async () => {
@@ -129,6 +148,49 @@ describe('manager', () => {
 
       assert.calledWithExactly(debugStub, 'failed to renew auth token: %j', fakeErr)
       expect(instance._renewTimeout).to.be.undefined
+    })
+
+    it('it should reauthenticate websockets', async () => {
+      const newToken = {
+        token: 'new token',
+        expiresAt
+      }
+      renewAuthTokenStub.resolves(newToken)
+
+      const instance = new Manager({
+        ...args,
+        authTokenExpiresAt: undefined
+      })
+      const ws = instance.openWS()
+      await delay(100)
+
+      ws.ev.removeAllListeners()
+      expect(instance.authToken).to.eq(newToken.token)
+      expect(instance.authTokenExpiresAt).to.eq(newToken.expiresAt)
+      expect(instance._renewTimeout).not.to.be.undefined
+      clearTimeout(instance._renewTimeout)
+      assert.calledWithExactly(WsStateConstructorStub, {
+        url: args.wsURL,
+        agent: args.agent,
+        apiKey: args.apiKey,
+        apiSecret: args.apiSecret,
+        authToken: args.authToken,
+        transform: args.transform,
+        plugins: {}
+      })
+      expect(ws.sendBuffer).to.eql([
+        {
+          event: 'auth',
+          token: newToken.token,
+          calc: args.calc,
+          dms: args.dms
+        }
+      ])
+      assert.calledWithExactly(renewAuthTokenStub, {
+        authURL: args.authURL,
+        userId: args.userId,
+        authToken: args.authToken
+      })
     })
   })
 })
