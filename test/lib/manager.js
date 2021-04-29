@@ -11,6 +11,7 @@ const { delay } = require('../utils')
 const sandbox = createSandbox()
 const renewAuthTokenStub = sandbox.stub()
 const RESTv2ConstructorStub = sandbox.stub()
+const debugStub = sandbox.stub()
 
 const Manager = proxyquire('../../lib/manager', {
   './manager/auth': {
@@ -21,7 +22,8 @@ const Manager = proxyquire('../../lib/manager', {
       RESTv2ConstructorStub(opts)
       return {}
     })
-  }
+  },
+  debug: () => debugStub
 })
 
 describe('manager', () => {
@@ -112,6 +114,20 @@ describe('manager', () => {
       assert.notCalled(renewAuthTokenStub)
       expect(instance.authToken).to.be.undefined
       expect(instance.authTokenExpiresAt).to.be.undefined
+      expect(instance._renewTimeout).to.be.undefined
+    })
+
+    it('should handle errors', async () => {
+      const fakeErr = new Error()
+      renewAuthTokenStub.rejects(fakeErr)
+
+      const instance = new Manager({
+        ...args,
+        authTokenExpiresAt: undefined
+      })
+      await delay(100)
+
+      assert.calledWithExactly(debugStub, 'failed to renew auth token: %j', fakeErr)
       expect(instance._renewTimeout).to.be.undefined
     })
   })
