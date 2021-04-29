@@ -78,6 +78,9 @@ describe('manager', () => {
       })
       expect(instance.authToken).to.eq(newToken.token)
       expect(instance.authTokenExpiresAt).to.eq(newToken.expiresAt)
+      // eslint-disable-next-line no-unused-expressions
+      expect(instance._renewTimeout).not.to.be.undefined
+      clearTimeout(instance._renewTimeout)
     })
   })
 })
