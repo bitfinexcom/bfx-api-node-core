@@ -16,13 +16,14 @@ opening new sockets/closing existing one as needed.
     * [.getWSByIndex(index)](#Manager+getWSByIndex) ⇒ <code>Object</code>
     * [.updateWS(id, state)](#Manager+updateWS)
     * [.closeAllSockets()](#Manager+closeAllSockets)
+    * [.reconnectAllSockets()](#Manager+reconnectAllSockets)
     * [.closeWS(id)](#Manager+closeWS)
     * [.openWS()](#Manager+openWS) ⇒ <code>Object</code>
     * [.onWS(eventName, filterValue, cb)](#Manager+onWS)
     * [.onceWS(eventName, filterValue, cb)](#Manager+onceWS)
     * [.notifyPlugins(type, section, name, args)](#Manager+notifyPlugins)
     * [.withFreeDataSocket(cb)](#Manager+withFreeDataSocket)
-    * [.withDataSocket(filterCB, cb)](#Manager+withDataSocket)
+    * [.withDataSocket(filterCb, cb)](#Manager+withDataSocket)
     * [.withAuthSocket(cb)](#Manager+withAuthSocket)
     * [.withSocket(cb)](#Manager+withSocket)
     * [.sampleWS()](#Manager+sampleWS) ⇒ <code>Object</code>
@@ -82,9 +83,10 @@ Authenticates all open API connections
 | args | <code>Object</code> | optional, defaults to values provided to constructor |
 | args.apiKey | <code>string</code> |  |
 | args.apiSecret | <code>string</code> |  |
-| args.authToken | <code>string</code> |  optional, has priority over API key/secret|
+| args.authToken | <code>string</code> |  |
 | args.dms | <code>number</code> | dead man switch, active 4 |
 | args.calc | <code>number</code> |  |
+| args.forceAuth | <code>boolean</code> |  |
 
 <a name="Manager+getWS"></a>
 
@@ -141,6 +143,12 @@ if the connection exists.
 Closes all connections in the pool
 
 **Kind**: instance method of [<code>Manager</code>](#Manager)  
+<a name="Manager+reconnectAllSockets"></a>
+
+### manager.reconnectAllSockets()
+Closes and re-opens all connections in the pool
+
+**Kind**: instance method of [<code>Manager</code>](#Manager)  
 <a name="Manager+closeWS"></a>
 
 ### manager.closeWS(id)
@@ -171,7 +179,7 @@ object.
 | --- | --- | --- |
 | eventName | <code>string</code> |  |
 | filterValue | <code>Object</code> | value(s) to check for |
-| cb | <code>Method</code> |  |
+| cb | <code>function</code> |  |
 
 <a name="Manager+onceWS"></a>
 
@@ -185,7 +193,7 @@ object, and only fires once
 | --- | --- | --- |
 | eventName | <code>string</code> |  |
 | filterValue | <code>Object</code> | value(s) to check for |
-| cb | <code>Method</code> |  |
+| cb | <code>function</code> |  |
 
 <a name="Manager+notifyPlugins"></a>
 
@@ -219,7 +227,7 @@ is opened.
 
 <a name="Manager+withDataSocket"></a>
 
-### manager.withDataSocket(filterCB, cb)
+### manager.withDataSocket(filterCb, cb)
 Calls the provided function with a connection instance that is subscribed
 to a channel matching the provided filter callback, which is called with
 each subscribed channel descriptor.
@@ -228,7 +236,7 @@ each subscribed channel descriptor.
 
 | Param | Type |
 | --- | --- |
-| filterCB | <code>function</code> | 
+| filterCb | <code>function</code> | 
 | cb | <code>function</code> | 
 
 <a name="Manager+withAuthSocket"></a>
