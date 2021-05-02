@@ -64,14 +64,21 @@ describe('manager', () => {
   })
 
   describe('auth token updated event', () => {
-    it('should update the rest client and websockets auth', () => {
+    it('should update the rest client and websockets auth', async () => {
       const authToken = 'new token'
 
       const instance = new Manager(args)
       const { ev, id } = instance.openWS()
 
+      const newTokenPublished = new Promise((resolve) => {
+        instance.once('auth:token:updated', resolve)
+      })
+
       ev.emit('auth:token:updated', { authToken })
 
+      const { authToken: publishedToken } = await newTokenPublished
+
+      expect(publishedToken).to.eq(authToken)
       assert.calledWithExactly(RESTv2ConstructorStub.firstCall, {
         apiKey: args.apiKey,
         apiSecret: args.apiSecret,
@@ -103,6 +110,8 @@ describe('manager', () => {
         }
       )
       expect(instance.rest).not.to.undefined
+      ev.removeAllListeners()
+      instance.removeAllListeners()
     })
   })
 })
