@@ -182,4 +182,91 @@ describe('manager', () => {
       })
     })
   })
+
+  describe('notifyPlugin', () => {
+    it('notifies the plugin and updates the ws state', () => {
+      const id = 'id'
+      const section = 'manager'
+      const name = 'event'
+      const args = { id }
+
+      const stub = sandbox.stub().returns({
+        internalState: 'new value'
+      })
+
+      const plugin = {
+        id: 'plugin id',
+        type: 'ws2',
+        [section]: {
+          [name]: stub
+        }
+      }
+
+      const ws = { internalState: 'value' }
+
+      const instance = new Manager({
+        plugins: [plugin]
+      })
+      instance.wsPool = [ws]
+      instance.notifyPlugin(plugin, section, name, args)
+
+      assert.calledWithExactly(stub, {
+        manager: instance,
+        state: ws,
+        id
+      })
+      expect(instance.wsPool).to.eql([
+        { internalState: 'new value' }
+      ])
+    })
+
+    it('notifies the plugin and updates the ws state', () => {
+      const id = 'id'
+      const section = 'manager'
+      const name = 'event'
+      const args = { id }
+
+      const stub = sandbox.stub()
+
+      const plugin = {
+        id: 'plugin id',
+        type: 'ws2',
+        pluginInternalState: 'valeu',
+        [section]: {
+          [name]: stub
+        }
+      }
+
+      const ws = {
+        wsInternalState: 'value',
+        plugins: {
+          [plugin.id]: plugin
+        }
+      }
+
+      stub.returns([
+        {
+          ...ws,
+          wsInternalState: 'new value'
+        },
+        {
+          pluginInternalState: 'new value'
+        }
+      ])
+
+      const instance = new Manager({
+        plugins: [plugin]
+      })
+      instance.wsPool = [ws]
+      instance.notifyPlugin(plugin, section, name, args)
+
+      assert.calledWithExactly(stub, {
+        manager: instance,
+        state: ws,
+        id
+      })
+      expect(instance.wsPool[0].wsInternalState).to.eq('new value')
+      expect(plugin.pluginInternalState).to.eq('new value')
+    })
+  })
 })
