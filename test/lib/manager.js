@@ -6,6 +6,7 @@ const { expect } = require('chai')
 const { createSandbox, assert } = require('sinon')
 const proxyquire = require('proxyquire')
 const EventEmitter = require('events')
+const WebSocket = require('ws')
 
 const sandbox = createSandbox()
 const WsStateConstructorStub = sandbox.stub()
@@ -18,7 +19,11 @@ const Manager = proxyquire('../../lib/manager', {
 
     return {
       id,
-      ev: new EventEmitter()
+      ev: new EventEmitter(),
+      ws: {
+        readyState: WebSocket.OPEN,
+        close: sandbox.stub()
+      }
     }
   })
 })
@@ -90,6 +95,26 @@ describe('manager', () => {
         'exec:ping'
       ])
       assert.calledWithExactly(notifyPluginsStub, 'ws2', 'manager', 'ws:created', { id: wsId })
+      ev.removeAllListeners()
+    })
+  })
+
+  describe('closeAllSockets', () => {
+    it('close all sockets and notify plugins', () => {
+      const wsId = 'ws id'
+      WsStateConstructorStub.returns(wsId)
+      const notifyPluginsStub = sandbox.stub()
+
+      const instance = new Manager(args)
+      instance.notifyPlugins = notifyPluginsStub
+      const { ev, id, ws } = instance.openWS()
+
+      instance.closeWS(id)
+
+      expect(id).to.eq(wsId)
+      assert.calledWithExactly(notifyPluginsStub, 'ws2', 'manager', 'ws:destroyed', { id: wsId })
+      assert.calledOnce(ws.close)
+      expect(instance.wsPool).to.be.empty
       ev.removeAllListeners()
     })
   })
