@@ -38,7 +38,6 @@ opening new sockets/closing existing one as needed.
 | --- | --- | --- |
 | args | <code>Object</code> |  |
 | args.wsURL | <code>string</code> | defaults to production Bitfinex WSv2 API url |
-| args.restURL | <code>string</code> | defaults to production Bitfinex RESTv2 API url |
 | args.agent | <code>Object</code> | connection agent |
 | args.apiKey | <code>string</code> | used to authenticate sockets |
 | args.apiSecret | <code>string</code> | used to authenticate sockets |
