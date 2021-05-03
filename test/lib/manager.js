@@ -44,7 +44,7 @@ describe('manager', () => {
   }
 
   describe('openWS', () => {
-    it('', async () => {
+    it('open ws and notify plugins', async () => {
       const wsId = 'ws id'
       WsStateConstructorStub.returns(wsId)
       const notifyPluginsStub = sandbox.stub()
