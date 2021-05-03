@@ -118,4 +118,37 @@ describe('manager', () => {
       ev.removeAllListeners()
     })
   })
+
+  describe('notifyPlugins', () => {
+    it('notify plugins that match type', () => {
+      const notifyPluginStub = sandbox.stub()
+
+      const type = 'notification type'
+      const section = 'notification section'
+      const name = 'notification name'
+      const args = { id: 'id' }
+
+      const pluginThatMatches = {
+        id: 'plugin 1',
+        type
+      }
+      const pluginDoesNoMatch = {
+        id: 'plugin 2',
+        type: 'another type'
+      }
+
+      const instance = new Manager({
+        plugins: [
+          pluginThatMatches,
+          pluginDoesNoMatch
+        ]
+      })
+      instance.notifyPlugin = notifyPluginStub
+      instance.notifyPlugins(type, section, name, args)
+
+      assert.calledOnce(notifyPluginStub)
+      assert.calledWithExactly(notifyPluginStub, pluginThatMatches, section, name, args)
+      expect(notifyPluginStub.calledWith(pluginDoesNoMatch)).to.be.false
+    })
+  })
 })
