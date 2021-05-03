@@ -178,7 +178,7 @@ describe('manager', () => {
 
       assert.calledTwice(notifyPluginStub)
       plugins.forEach((plugin, index) => {
-        expect(notifyPluginStub.onCall(index).calledWithExactly(plugin, section, name, args)).to.be.true
+        expect(notifyPluginStub.getCall(index).calledWithExactly(plugin, section, name, args)).to.be.true
       })
     })
   })
