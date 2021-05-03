@@ -150,5 +150,36 @@ describe('manager', () => {
       assert.calledWithExactly(notifyPluginStub, pluginThatMatches, section, name, args)
       expect(notifyPluginStub.calledWith(pluginDoesNoMatch)).to.be.false
     })
+
+    it('wildcard type should notify all plugins', () => {
+      const notifyPluginStub = sandbox.stub()
+
+      const type = '*'
+      const section = 'notification section'
+      const name = 'notification name'
+      const args = { id: 'id' }
+
+      const plugins = [
+        {
+          id: 'plugin 1',
+          type: 'first type'
+        },
+        {
+          id: 'plugin 2',
+          type: 'another type'
+        }
+      ]
+
+      const instance = new Manager({
+        plugins
+      })
+      instance.notifyPlugin = notifyPluginStub
+      instance.notifyPlugins(type, section, name, args)
+
+      assert.calledTwice(notifyPluginStub)
+      plugins.forEach((plugin, index) => {
+        expect(notifyPluginStub.onCall(index).calledWithExactly(plugin, section, name, args)).to.be.true
+      })
+    })
   })
 })
