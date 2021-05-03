@@ -8,17 +8,10 @@ const proxyquire = require('proxyquire')
 const EventEmitter = require('events')
 
 const sandbox = createSandbox()
-const RESTv2ConstructorStub = sandbox.stub()
 const WsStateConstructorStub = sandbox.stub()
 const authWsStub = sandbox.stub()
 
 const Manager = proxyquire('../../lib/manager', {
-  'bfx-api-node-rest': {
-    RESTv2: sandbox.spy((opts) => {
-      RESTv2ConstructorStub(opts)
-      return {}
-    })
-  },
   './ws2/auth': authWsStub,
   './ws2/init_state': sandbox.spy((opts) => {
     WsStateConstructorStub(opts)
@@ -44,24 +37,10 @@ describe('manager', () => {
     authToken: 'auth token',
     transform: 'transform',
     agent: false,
-    restURL: 'rest url',
     wsURL: 'ws url',
     calc: 'calc',
     dms: 'dms'
   }
-
-  it('creates a new manager instance', () => {
-    const instance = new Manager(args)
-    assert.calledWithExactly(RESTv2ConstructorStub, {
-      apiKey: args.apiKey,
-      apiSecret: args.apiSecret,
-      authToken: args.authToken,
-      transform: args.transform,
-      agent: args.agent,
-      url: args.restURL
-    })
-    expect(instance.rest).not.to.undefined
-  })
 
   describe('auth token updated event', () => {
     it('should update the rest client and websockets auth', async () => {
@@ -79,22 +58,6 @@ describe('manager', () => {
       const { authToken: publishedToken } = await newTokenPublished
 
       expect(publishedToken).to.eq(authToken)
-      assert.calledWithExactly(RESTv2ConstructorStub.firstCall, {
-        apiKey: args.apiKey,
-        apiSecret: args.apiSecret,
-        authToken: args.authToken,
-        transform: args.transform,
-        agent: args.agent,
-        url: args.restURL
-      })
-      assert.calledWithExactly(RESTv2ConstructorStub.secondCall, {
-        apiKey: args.apiKey,
-        apiSecret: args.apiSecret,
-        authToken: authToken,
-        transform: args.transform,
-        agent: args.agent,
-        url: args.restURL
-      })
       assert.calledWithExactly(
         authWsStub,
         {
@@ -109,7 +72,6 @@ describe('manager', () => {
           calc: args.calc
         }
       )
-      expect(instance.rest).not.to.undefined
       ev.removeAllListeners()
       instance.removeAllListeners()
     })
