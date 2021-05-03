@@ -14,9 +14,10 @@ const authWsStub = sandbox.stub()
 const Manager = proxyquire('../../lib/manager', {
   './ws2/auth': authWsStub,
   './ws2/init_state': sandbox.spy((opts) => {
-    WsStateConstructorStub(opts)
+    const id = WsStateConstructorStub(opts)
+
     return {
-      id: Math.random(),
+      id,
       ev: new EventEmitter()
     }
   })
@@ -42,38 +43,54 @@ describe('manager', () => {
     dms: 'dms'
   }
 
-  describe('auth token updated event', () => {
-    it('should update the rest client and websockets auth', async () => {
-      const authToken = 'new token'
+  describe('openWS', () => {
+    it('', async () => {
+      const wsId = 'ws id'
+      WsStateConstructorStub.returns(wsId)
+      const notifyPluginsStub = sandbox.stub()
 
       const instance = new Manager(args)
+      instance.notifyPlugins = notifyPluginsStub
       const { ev, id } = instance.openWS()
 
-      const newTokenPublished = new Promise((resolve) => {
-        instance.once('auth:token:updated', resolve)
-      })
-
-      ev.emit('auth:token:updated', { authToken })
-
-      const { authToken: publishedToken } = await newTokenPublished
-
-      expect(publishedToken).to.eq(authToken)
-      assert.calledWithExactly(
-        authWsStub,
-        {
-          id,
-          ev,
-          apiKey: args.apiKey,
-          apiSecret: args.apiSecret,
-          authToken
-        },
-        {
-          dms: args.dms,
-          calc: args.calc
-        }
-      )
+      expect(id).to.eq(wsId)
+      expect(ev.eventNames()).to.eql([
+        'self:open',
+        'self:reopen',
+        'self:message',
+        'self:close',
+        'self:error',
+        'error',
+        'data:notification',
+        'data:ticker',
+        'data:trades',
+        'data:candles',
+        'data:book',
+        'data:managed:book',
+        'data:managed:candles',
+        'data:book:cs',
+        'data:auth',
+        'event:auth',
+        'event:auth:success',
+        'event:auth:error',
+        'event:subscribed',
+        'event:unsubscribed',
+        'event:config',
+        'event:error',
+        'event:info',
+        'event:info:server-restart',
+        'event:info:maintenance-start',
+        'event:info:maintenance-end',
+        'event:pong',
+        'plugin:event',
+        'exec:order:submit',
+        'exec:order:update',
+        'exec:order:cancel',
+        'exec:flags:set',
+        'exec:ping'
+      ])
+      assert.calledWithExactly(notifyPluginsStub, 'ws2', 'manager', 'ws:created', { id: wsId })
       ev.removeAllListeners()
-      instance.removeAllListeners()
     })
   })
 })
