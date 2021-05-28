@@ -17,10 +17,10 @@ an event emitter to capture and report API stream events.</p>
 <dd><p>Sends the provided data to the active WebSocket connection, or buffers it if
 the connection is not yet open.</p>
 </dd>
-<dt><a href="#subscribe">subscribe(state, channel, payload)</a></dt>
+<dt><a href="#subscribe">subscribe(state, channel, payload)</a> ⇒ <code>Object</code></dt>
 <dd><p>Subscribes to the specified channel, buffers if the connection is not open.</p>
 </dd>
-<dt><a href="#unsubscribe">unsubscribe(state, chanId)</a></dt>
+<dt><a href="#unsubscribe">unsubscribe(state, chanId)</a> ⇒ <code>Object</code></dt>
 <dd><p>Unsubscribes from the specified channel, buffers if the connection is not
 open.</p>
 </dd>
@@ -87,7 +87,7 @@ Creates & opens a WSv2 API connection, and returns the resulting state object
 | opts.transform | <code>boolean</code> | if true, raw API data arrays will be automatically converted to bfx-api-node-models instances |
 | opts.apiKey | <code>string</code> | for later authentication |
 | opts.apiSecret | <code>string</code> | for later authentication |
-| args.authToken | <code>string</code> |  for later authentication; optional, has priority over API key/secret|
+| opts.authToken | <code>string</code> | for later authentication; takes priority over apiKey and apiSecret |
 | opts.plugins | <code>Object</code> | optional set of plugins to use with the connection |
 
 <a name="open"></a>
@@ -119,10 +119,11 @@ the connection is not yet open.
 
 <a name="subscribe"></a>
 
-## subscribe(state, channel, payload)
+## subscribe(state, channel, payload) ⇒ <code>Object</code>
 Subscribes to the specified channel, buffers if the connection is not open.
 
 **Kind**: global function  
+**Returns**: <code>Object</code> - state - original ref  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -132,11 +133,12 @@ Subscribes to the specified channel, buffers if the connection is not open.
 
 <a name="unsubscribe"></a>
 
-## unsubscribe(state, chanId)
+## unsubscribe(state, chanId) ⇒ <code>Object</code>
 Unsubscribes from the specified channel, buffers if the connection is not
 open.
 
 **Kind**: global function  
+**Returns**: <code>Object</code> - state - original ref  
 
 | Param | Type | Description |
 | --- | --- | --- |
