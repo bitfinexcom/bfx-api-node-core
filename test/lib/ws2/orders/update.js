@@ -6,6 +6,7 @@ const updateOrder = require('../../../../lib/ws2/orders/update')
 
 const defaultState = {
   ev: {
+    removeAllListeners: () => {},
     once: () => {}
   },
   emit: () => {},
@@ -34,6 +35,7 @@ describe('ws2:orders:update', () => {
     updateOrder({
       ...defaultState,
       ev: {
+        removeAllListeners: () => {},
         once: (eventName, handler) => {
           if (eventName === 'n:ou-req:42:success') {
             assert(handler)
@@ -48,6 +50,7 @@ describe('ws2:orders:update', () => {
     updateOrder({
       ...defaultState,
       ev: {
+        removeAllListeners: () => {},
         once: (eventName, handler) => {
           if (eventName === 'n:ou-req:42:error') {
             assert(handler)
