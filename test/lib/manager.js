@@ -91,6 +91,7 @@ describe('manager', () => {
         'exec:order:submit',
         'exec:order:update',
         'exec:order:cancel',
+        'exec:order:cancel-by-gid',
         'exec:flags:set',
         'exec:ping'
       ])
