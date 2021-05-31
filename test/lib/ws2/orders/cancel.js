@@ -7,8 +7,8 @@ const { Order } = require('bfx-api-node-models')
 
 const defaultState = {
   ev: {
-    removeAllListeners: () => {},
-    once: () => {}
+    off: () => {},
+    once: (_, handler) => { handler() }
   },
   emit: () => {},
   transform: false
@@ -38,9 +38,10 @@ describe('ws2:orders:cancel', () => {
     cancelOrder({
       ...defaultState,
       ev: {
-        removeAllListeners: () => {},
+        off: () => {},
         once: (eventName, handler) => {
           if (eventName === 'n:oc-req:42:success') {
+            handler()
             assert(handler)
             done()
           }
@@ -53,11 +54,13 @@ describe('ws2:orders:cancel', () => {
     cancelOrder({
       ...defaultState,
       ev: {
-        removeAllListeners: () => {},
+        off: () => {},
         once: (eventName, handler) => {
           if (eventName === 'n:oc-req:42:error') {
             assert(handler)
             done()
+          } else {
+            handler()
           }
         }
       }

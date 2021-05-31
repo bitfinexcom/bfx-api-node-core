@@ -7,8 +7,8 @@ const auth = require('../../../lib/ws2/auth')
 const defaultState = {
   isOpen: true,
   ev: {
-    removeAllListeners: () => {},
-    once: () => {}
+    off: () => {},
+    once: (_, handler) => { handler() }
   },
   apiKey: 'key',
   apiSecret: 'secret',
@@ -66,9 +66,10 @@ describe('ws2:auth', () => {
     auth({
       ...defaultState,
       ev: {
-        removeAllListeners: () => {},
+        off: () => {},
         once: (eventName, handler) => {
           if (eventName === 'event:auth:success') {
+            handler()
             assert(handler)
             done()
           }
@@ -81,9 +82,10 @@ describe('ws2:auth', () => {
     auth({
       ...defaultState,
       ev: {
-        removeAllListeners: () => {},
+        off: () => {},
         once: (eventName, handler) => {
           if (eventName === 'event:auth:error') {
+            handler()
             assert(handler)
             done()
           }
