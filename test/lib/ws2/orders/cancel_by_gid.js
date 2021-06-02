@@ -6,7 +6,8 @@ const cancelOrderByGid = require('../../../../lib/ws2/orders/cancel_by_gid')
 
 const defaultState = {
   ev: {
-    once: () => {}
+    off: () => {},
+    once: (_, handler) => { handler() }
   },
   emit: () => {},
   transform: false
@@ -31,8 +32,10 @@ describe('ws2:orders:cancel_by_gid', () => {
     cancelOrderByGid({
       ...defaultState,
       ev: {
+        off: () => {},
         once: (eventName, handler) => {
           if (eventName === `n:oc_multi-req:${gid}:success`) {
+            handler()
             assert(handler)
             done()
           }
@@ -45,10 +48,13 @@ describe('ws2:orders:cancel_by_gid', () => {
     cancelOrderByGid({
       ...defaultState,
       ev: {
+        off: () => {},
         once: (eventName, handler) => {
           if (eventName === `n:oc_multi-req:${gid}:error`) {
             assert(handler)
             done()
+          } else {
+            handler()
           }
         }
       }
