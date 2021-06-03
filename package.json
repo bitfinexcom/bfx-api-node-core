@@ -1,6 +1,6 @@
 {
   "name": "bfx-api-node-core",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Core Bitfinex Node API",
   "engines": {
     "node": ">=7"
