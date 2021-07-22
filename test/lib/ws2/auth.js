@@ -10,8 +10,12 @@ const defaultState = {
     off: () => {},
     once: (_, handler) => { handler() }
   },
-  apiKey: 'key',
-  apiSecret: 'secret',
+  authArgs: {
+    apiKey: 'key',
+    apiSecret: 'secret',
+    dms: 4,
+    calc: 0
+  },
   ws: {
     send: () => {}
   }
@@ -35,16 +39,16 @@ describe('ws2:auth', () => {
           done()
         }
       }
-    }, {
-      dms: 4,
-      calc: 0
     })
   })
 
   it('sends auth packet w/ authToken', (done) => {
     auth({
       ...defaultState,
-      authToken: 'token',
+      authArgs: {
+        ...defaultState.authArgs,
+        authToken: 'token'
+      },
       ws: {
         send: (json) => {
           const msg = JSON.parse(json)
@@ -56,9 +60,6 @@ describe('ws2:auth', () => {
           done()
         }
       }
-    }, {
-      dms: 4,
-      calc: 0
     })
   })
 
