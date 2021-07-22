@@ -321,28 +321,28 @@ describe('Reconnect all sockets', () => {
 
     m.openWS()
 
-    expect(m.getWSByIndex(0).apiKey).to.eq(API_KEY)
-    expect(m.getWSByIndex(0).apiSecret).to.eq(API_SECRET)
+    expect(m.getWSByIndex(0).authArgs.apiKey).to.eq(API_KEY)
+    expect(m.getWSByIndex(0).authArgs.apiSecret).to.eq(API_SECRET)
 
     m.wsPool[0].managedClose = true // do not close wss on connection reopen
 
     await Promise.delay(50)
     expect(m.getWSByIndex(0).authenticated).to.be.true
 
-    m.updateAPICredentials({ apiKey: 'invalid api key', apiSecret: 'invalid api secret' })
+    m.updateAuthArgs({ apiKey: 'invalid api key', apiSecret: 'invalid api secret' })
 
-    expect(m.getWSByIndex(0).apiKey).to.eq('invalid api key')
-    expect(m.getWSByIndex(0).apiSecret).to.eq('invalid api secret')
+    expect(m.getWSByIndex(0).authArgs.apiKey).to.eq('invalid api key')
+    expect(m.getWSByIndex(0).authArgs.apiSecret).to.eq('invalid api secret')
 
     m.reconnectAllSockets()
 
     await Promise.delay(50)
     expect(m.getWSByIndex(0).authenticated).to.be.false
 
-    m.updateAPICredentials({ apiKey: API_KEY, apiSecret: API_SECRET })
+    m.updateAuthArgs({ apiKey: API_KEY, apiSecret: API_SECRET })
 
-    expect(m.getWSByIndex(0).apiKey).to.eq(API_KEY)
-    expect(m.getWSByIndex(0).apiSecret).to.eq(API_SECRET)
+    expect(m.getWSByIndex(0).authArgs.apiKey).to.eq(API_KEY)
+    expect(m.getWSByIndex(0).authArgs.apiSecret).to.eq(API_SECRET)
 
     m.reconnectAllSockets()
 
@@ -370,25 +370,25 @@ describe('Reconnect all sockets', () => {
 
     m.openWS()
 
-    expect(m.getWSByIndex(0).authToken).to.eq(AUTH_TOKEN)
+    expect(m.getWSByIndex(0).authArgs.authToken).to.eq(AUTH_TOKEN)
 
     m.wsPool[0].managedClose = true // do not close wss on connection reopen
 
     await Promise.delay(50)
     expect(m.getWSByIndex(0).authenticated).to.be.true
 
-    m.updateAPICredentials({ authToken: 'invalid auth token' })
+    m.updateAuthArgs({ authToken: 'invalid auth token' })
 
-    expect(m.getWSByIndex(0).authToken).to.eq('invalid auth token')
+    expect(m.getWSByIndex(0).authArgs.authToken).to.eq('invalid auth token')
 
     m.reconnectAllSockets()
 
     await Promise.delay(50)
     expect(m.getWSByIndex(0).authenticated).to.be.false
 
-    m.updateAPICredentials({ authToken: AUTH_TOKEN })
+    m.updateAuthArgs({ authToken: AUTH_TOKEN })
 
-    expect(m.getWSByIndex(0).authToken).to.eq(AUTH_TOKEN)
+    expect(m.getWSByIndex(0).authArgs.authToken).to.eq(AUTH_TOKEN)
 
     m.reconnectAllSockets()
 

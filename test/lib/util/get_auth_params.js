@@ -7,38 +7,38 @@ const getAuthParams = require('../../../lib/util/get_auth_params')
 
 describe('utils:get_auth_params', () => {
   it('prioritizes authToken over apiKey and apiSecret', () => {
-    const dms = 4
-    const calc = 0
-    const state = {
+    const authArgs = {
       apiKey: 'key',
       apiSecret: 'secret',
-      authToken: 'token'
+      authToken: 'token',
+      dms: 4,
+      calc: 0
     }
 
-    const res = getAuthParams.get(state, dms, calc)
+    const res = getAuthParams.get(authArgs)
 
     assert.deepStrictEqual(res.event, 'auth')
-    assert.deepStrictEqual(res.dms, dms)
-    assert.deepStrictEqual(res.calc, calc)
-    assert.deepStrictEqual(res.token, state.authToken)
+    assert.deepStrictEqual(res.dms, authArgs.dms)
+    assert.deepStrictEqual(res.calc, authArgs.calc)
+    assert.deepStrictEqual(res.token, authArgs.authToken)
     assert.deepStrictEqual(Object.keys(res), ['event', 'dms', 'calc', 'token'])
   })
 
   it('returns params with apiKey and apiSecret when authToken is not provided', () => {
-    const dms = 4
-    const calc = 0
-    const state = {
+    const authArgs = {
       apiKey: 'key',
       apiSecret: 'secret',
-      authToken: ''
+      authToken: '',
+      dms: 4,
+      calc: 0
     }
 
-    const res = getAuthParams.get(state, dms, calc)
+    const res = getAuthParams.get(authArgs)
 
     assert.deepStrictEqual(res.event, 'auth')
-    assert.deepStrictEqual(res.dms, dms)
-    assert.deepStrictEqual(res.calc, calc)
-    assert.deepStrictEqual(res.apiKey, state.apiKey)
+    assert.deepStrictEqual(res.dms, authArgs.dms)
+    assert.deepStrictEqual(res.calc, authArgs.calc)
+    assert.deepStrictEqual(res.apiKey, authArgs.apiKey)
     assert.deepStrictEqual(Object.keys(res), ['event', 'dms', 'calc', 'apiKey', 'authSig', 'authPayload', 'authNonce'])
   })
 })
