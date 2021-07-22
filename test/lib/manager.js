@@ -28,6 +28,15 @@ const Manager = proxyquire('../../lib/manager', {
   })
 })
 
+const API_KEY = 'api key'
+const API_SECRET = 'api secret'
+const AUTH_TOKEN = 'auth token'
+
+const Promise = require('bluebird')
+const WSManager = require('../../lib/manager')
+const { genAuthSig } = require('bfx-api-node-util')
+const { MockWSv2Server } = require('bfx-api-mock-srv')
+
 describe('manager', () => {
   afterEach(() => {
     sandbox.reset()
@@ -269,5 +278,121 @@ describe('manager', () => {
       expect(instance.wsPool[0].wsInternalState).to.eq('new value')
       expect(plugin.pluginInternalState).to.eq('new value')
     })
+  })
+})
+
+describe('Reconnect all sockets', () => {
+  let m = null
+  let wss = null
+
+  afterEach(async () => {
+    try {
+      m.closeAllSockets()
+    } catch (e) {
+      assert(true)
+    }
+
+    if (wss && wss.isOpen()) {
+      await wss.close()
+    }
+
+    m = null // eslint-disable-line
+    wss = null // eslint-disable-line
+  })
+
+  it('reconnects properly when API credentials are updated', async () => {
+    wss = new MockWSv2Server({
+      syncOnConnect: false,
+      authMiddleware: ({ apiKey, authSig, authPayload, token }) => {
+        if (token) {
+          return token === AUTH_TOKEN
+        } else {
+          const { sig } = genAuthSig(API_SECRET, authPayload)
+          return apiKey === API_KEY && authSig === sig
+        }
+      }
+    })
+
+    m = new WSManager({
+      apiKey: API_KEY,
+      apiSecret: API_SECRET,
+      wsURL: 'ws://localhost:9997'
+    })
+
+    m.openWS()
+
+    expect(m.getWSByIndex(0).apiKey).to.eq(API_KEY)
+    expect(m.getWSByIndex(0).apiSecret).to.eq(API_SECRET)
+
+    m.wsPool[0].managedClose = true // do not close wss on connection reopen
+
+    await Promise.delay(50)
+    expect(m.getWSByIndex(0).authenticated).to.be.true
+
+    m.updateAPICredentials({ apiKey: 'invalid api key', apiSecret: 'invalid api secret' })
+
+    expect(m.getWSByIndex(0).apiKey).to.eq('invalid api key')
+    expect(m.getWSByIndex(0).apiSecret).to.eq('invalid api secret')
+
+    m.reconnectAllSockets()
+
+    await Promise.delay(50)
+    expect(m.getWSByIndex(0).authenticated).to.be.false
+
+    m.updateAPICredentials({ apiKey: API_KEY, apiSecret: API_SECRET })
+
+    expect(m.getWSByIndex(0).apiKey).to.eq(API_KEY)
+    expect(m.getWSByIndex(0).apiSecret).to.eq(API_SECRET)
+
+    m.reconnectAllSockets()
+
+    await Promise.delay(50)
+    expect(m.getWSByIndex(0).authenticated).to.be.true
+  })
+
+  it('reconnects properly when auth token is updated', async () => {
+    wss = new MockWSv2Server({
+      syncOnConnect: false,
+      authMiddleware: ({ apiKey, authSig, authPayload, token }) => {
+        if (token) {
+          return token === AUTH_TOKEN
+        } else {
+          const { sig } = genAuthSig(API_SECRET, authPayload)
+          return apiKey === API_KEY && authSig === sig
+        }
+      }
+    })
+
+    m = new WSManager({
+      authToken: AUTH_TOKEN,
+      wsURL: 'ws://localhost:9997'
+    })
+
+    m.openWS()
+
+    expect(m.getWSByIndex(0).authToken).to.eq(AUTH_TOKEN)
+
+    m.wsPool[0].managedClose = true // do not close wss on connection reopen
+
+    await Promise.delay(50)
+    expect(m.getWSByIndex(0).authenticated).to.be.true
+
+    m.updateAPICredentials({ authToken: 'invalid auth token' })
+
+    expect(m.getWSByIndex(0).authToken).to.eq('invalid auth token')
+
+    m.reconnectAllSockets()
+
+    await Promise.delay(50)
+    expect(m.getWSByIndex(0).authenticated).to.be.false
+
+    m.updateAPICredentials({ authToken: AUTH_TOKEN })
+
+    expect(m.getWSByIndex(0).authToken).to.eq(AUTH_TOKEN)
+
+    m.reconnectAllSockets()
+
+    await Promise.delay(50)
+    expect(m.getWSByIndex(0).authenticated).to.be.true
   })
 })

@@ -35,6 +35,7 @@
   },
   "homepage": "http://bitfinexcom.github.io/bfx-api-node-core/",
   "devDependencies": {
+    "bfx-api-mock-srv": "^1.1.4",
     "chai": "^4.3.4",
     "jsdoc-to-markdown": "^5.0.1",
     "mocha": "^6.2.0",
