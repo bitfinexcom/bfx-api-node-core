@@ -44,7 +44,7 @@
     "standard": "^16.0.3"
   },
   "dependencies": {
-    "bfx-api-node-models": "git+https://github.com/avsek477/bfx-api-node-models.git#add-visible-on-hit-hidden-orders",
+    "bfx-api-node-models": "git+https://github.com/bitfinexcom/bfx-api-node-models.git#1.6.2",
     "bfx-api-node-rest": "^4.1.2",
     "bfx-api-node-util": "^1.0.10",
     "bfx-api-node-ws1": "^1.0.3",
