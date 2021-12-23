@@ -1,6 +1,6 @@
 {
   "name": "bfx-api-node-core",
-  "version": "1.5.5",
+  "version": "1.5.6",
   "description": "Core Bitfinex Node API",
   "engines": {
     "node": ">=7"
@@ -44,7 +44,7 @@
     "standard": "^16.0.3"
   },
   "dependencies": {
-    "bfx-api-node-models": "git+https://github.com/bitfinexcom/bfx-api-node-models.git#1.6.2",
+    "bfx-api-node-models": "git+https://github.com/bitfinexcom/bfx-api-node-models.git#v1.6.2",
     "bfx-api-node-rest": "^4.1.2",
     "bfx-api-node-util": "^1.0.10",
     "bfx-api-node-ws1": "^1.0.3",
