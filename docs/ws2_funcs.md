@@ -85,9 +85,10 @@ Creates & opens a WSv2 API connection, and returns the resulting state object
 | opts.url | <code>string</code> | defaults to production Bitfinex WSv2 API url |
 | opts.agent | <code>Object</code> | connection agent |
 | opts.transform | <code>boolean</code> | if true, raw API data arrays will be automatically converted to bfx-api-node-models instances |
-| opts.apiKey | <code>string</code> | for later authentication |
-| opts.apiSecret | <code>string</code> | for later authentication |
-| opts.authToken | <code>string</code> | for later authentication; takes priority over apiKey and apiSecret |
+| opts.authArgs | <code>Object</code> | auth details |
+| opts.authArgs.apiKey | <code>string</code> | for later authentication |
+| opts.authArgs.apiSecret | <code>string</code> | for later authentication |
+| opts.authArgs.authToken | <code>string</code> | for later authentication; takes priority over apiKey and apiSecret |
 | opts.plugins | <code>Object</code> | optional set of plugins to use with the connection |
 
 <a name="open"></a>

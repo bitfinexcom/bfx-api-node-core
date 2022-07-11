@@ -48,6 +48,7 @@ opening new sockets/closing existing one as needed.
 | args.calc | <code>number</code> |  |
 | args.transform | <code>boolean</code> | if true, raw API data arrays will be automatically converted to bfx-api-node-models instances |
 | args.plugins | <code>Object</code> | optional set of plugins to use |
+| args.channelFilters | <code>Array.&lt;string&gt;</code> | During authentication you can provide an array to indicate which information/messages you are interested to receive (default = everything). |
 
 <a name="Manager+hasPlugin"></a>
 
