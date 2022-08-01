@@ -1,3 +1,6 @@
+# 1.6.1
+- fix: resubscribe channels on auto reconnect issue fix.
+
 # 1.6.0
 - feature: added auth filters
 
